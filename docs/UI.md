@@ -44,11 +44,13 @@ A rough touch scroll wheel could be implemented as three-capacitative buttons an
 
 ## Output
 
-The output device will be a segment-based LCD display. Most segments will be used for numerical/alphanumerical address characters, while some will be for custom icons. The MCU used is able to drive LCD screens directly, up to a theoretical 320 segments (multiplexed 8x40). The problem is that some LCD pins are multiplexed to other devices (such as SPI, Touch Sense Controller) and thus not all channels are actually available in our case. Also the more segments we drive, the more power we are going to use. PCB space increases because of the additional tracks and possibly using a larger version of the same MCU with more pins. Also a screen with more segments might need to be physically larger to be legible.
+The output device will be a segment-based LCD display. Most segments will be used for numerical/alphanumerical address characters, while some will be for custom icons. The MCU used is able to drive LCD screens directly, up to a theoretical 320 segments (multiplexed 8x40, thus requiring 48 pins). The problem is that some LCD pins are multiplexed to other devices (such as SPI, Touch Sense Controller) and thus not all channels are actually available in our case and in the end the safer choice is to keep it at around half of that. Also the more segments we drive, the more power we are going to use. PCB space increases because of the additional tracks and possibly using a larger version of the same MCU with more pins. Also a screen with more segments might need to be physically larger to be legible. If we really need more segments that the MCU can provide, we will need an external LCD controller which adds cost and requires extra PCB space. Chip-On-Glass LCD (controller is in the screen itself) is also possible, but the costs are much higher than the other solutions.
 
 At the same time, we need to be able to display as much information as possible on a transaction as we can and we must be able to display the mnemonics on the device's screen, so they never reach the client device.
 
 As it happens, cryptocurrency transactions are probably the worst case scenario for devices with limited screen estate, since they usually contain many digits and addresses are long. For this reason we will have to find some compromises.
+
+We will need space for some icons, such as the currency icon (ETH, SNT), battery icon (with 3 bars).
 
 The main decision points are
 
@@ -57,6 +59,7 @@ The main decision points are
 3. How to handle the decimal point. In a two lines display the upper line can be the integer part and the lower one the decimal part. Otherwise we will need a dot segment between any two digits if we want the decimal point to be at arbitrary locations.
 4. How detailed should alphabetic characters be displayed. A classical 7-segment digit is enough to for all hexadecimal digits legibly. Other letters can also be represented, but those with diagonal lines (such as W, M, Z, X, K), require quite a bit of imagination to represent and the user will need a translation table. Some letters are also only possible as lowercase and some as uppercase. A 14-segment display can display all letters legibly (altough some in lowercase and some in uppercase only) but each character costs twice the number of segments.
 5. How we display the destination address. We can display the amount and the address sequentially (so first you confirm the amount, then you confirm the destination or viceversa) or we can show them at the same time on separate lines. The first solution requires more interaction but allows showing more detailed information. Since Ethereum addresses are very long, we can only display a part. In a two-lines design the upper line would display the first digits and the lower line the last digits.
+6. In a hierachic wallet, how we display the one we are trying to use? We can have a few predetermined possibilities with a dedicated icon, or it can again be its address displayed in sequence with the other information.
 
 A screen is a little difficult to describe by words, so I will work on a few alternative designs to bring up for discussion.
 
