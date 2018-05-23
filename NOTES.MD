@@ -6,8 +6,8 @@ This document will contain a few notes and implementation details.
 
 The prototype is being developed on a Nucleo-L476RG board with a BlueNRG-MS-based shield for BLE. The MCU lacks PKA, AES and HASH acceleration. For this reason we are using two libraries
 
-1) [uECC](https://github.com/kmackay/micro-ecc) for ECDSA over secp256k1
-2) [cifra](https://github.com/ctz/cifra) for AES, SHA-256, SHA-3 (Kekkac), SHA-512, HMAC
+1. [uECC](https://github.com/kmackay/micro-ecc) for ECDSA over secp256k1
+2. [cifra](https://github.com/ctz/cifra) for AES, SHA-256, SHA-3 (Kekkac), SHA-512, HMAC
 
 The final chip will be of the (yet unreleased) STM32WB family which does have at least PKA and AES acceleration, which means we will most likely be able to replace the uECC library and part of the cifra library. However the latter library will most likely still be needed for SHA-3 (Kekkac).
 
