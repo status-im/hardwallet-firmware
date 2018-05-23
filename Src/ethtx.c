@@ -100,8 +100,12 @@ int eth_parse(EthTx *tx) {
   uint8_t *next;
   int len;
 
-  // Skip the nonce
+  // Enter the list
   len = rlp_parse(tx->buffer, &value, &next, tx->barrier);
+  RLP_ASSERT_LAST(len, 0, 0x7fffffff, next);
+
+  // Skip the nonce
+  len = rlp_parse(value, &value, &next, tx->barrier);
   RLP_ASSERT_NEXT(len, 0, 32, next);
 
   // Skip the gas_price
