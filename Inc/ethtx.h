@@ -33,10 +33,10 @@ struct {
   uint8_t *buffer;
   uint8_t *barrier;
 
+  uint8_t *dst_addr;
+
   int value_len;
   uint8_t *value;
-
-  uint8_t *dst_addr;
 
   int data_len;
   uint8_t *data;
