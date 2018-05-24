@@ -23,8 +23,8 @@
 /**
  * SHA3/Keccak
  * ===========
- * This implementation is compatible with FIPS 202,
- * rather than the original Keccak submission.
+ * Compatibility with either FIPS 202 or the original Keccak submission
+ * can be switched with the USE_FIPS_202 define.
  *
  */
 

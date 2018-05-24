@@ -301,8 +301,16 @@ static void sha3_update(cf_sha3_context *ctx, const void *data, size_t nbytes)
  * SHAKE: 0b11111
  */
   
-#define DOMAIN_HASH_PAD  0x06
+
+#define DOMAIN_KEKKAC_PAD  0x01
+#define DOMAIN_FIPS_202_PAD  0x06
 #define DOMAIN_SHAKE_PAD 0x1f
+
+#ifdef USE_FIPS202_PAD
+#define DOMAIN_HASH_PAD DOMAIN_FIPS_202_PAD
+#else
+#define DOMAIN_HASH_PAD DOMAIN_KEKKAC_PAD
+#endif
 
 static void pad(cf_sha3_context *ctx, uint8_t domain, size_t npad)
 {
