@@ -33,6 +33,9 @@ struct {
   uint8_t *buffer;
   uint8_t *barrier;
 
+  int list_len;
+  uint8_t *list;
+
   uint8_t *dst_addr;
 
   int value_len;
@@ -61,10 +64,21 @@ struct {
 int rlp_parse(uint8_t *item, uint8_t **value, uint8_t **next, uint8_t *barrier);
 
 /**
- * Takes an EthTx structure where the buffer and barrier fields must be populated and fills the other fields by parsing the content of the buffer. On error, returns -1, on success returns 0.
+ * Takes an EthTx structure where the buffer and barrier fields must be populated and fills the other fields by parsing the content of the buffer.
+ * On error, returns -1, on success returns 0.
  *
- * Only accepts unsigned transactions, because this is what we want to use it for.
+ * Only accepts unsigned transactions, where v is the chain id (for now on 1 byte only) and r and s are empty as per EIP-155
  */
 int eth_parse(EthTx *tx);
+
+/**
+ * Signs a previously parsed transaction. The transaction is modified in place.
+ * It must be possible to decrease the buffer pointer by 1, thus prepending 1 additional byte. The reason for this is that the overall
+ * length of the RLP list will increase and its encoded representation might be larger by one byte
+ *
+ * Additionally, it must be possible to increase the barrier pointer by 64 bytes. This will always happen because the
+ * the empty r and s component as substituted by the signature.
+ */
+int eth_sign(EthTx *tx, uint8_t *priv_key);
 
 #endif /* ETHTX_H_ */

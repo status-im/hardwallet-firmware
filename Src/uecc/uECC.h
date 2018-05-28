@@ -259,6 +259,7 @@ int uECC_sign(const uint8_t *private_key,
               const uint8_t *message_hash,
               unsigned hash_size,
               uint8_t *signature,
+              uint8_t *recid,
               uECC_Curve curve);
 
 /* uECC_HashContext structure.
@@ -336,6 +337,7 @@ int uECC_sign_deterministic(const uint8_t *private_key,
                             unsigned hash_size,
                             const uECC_HashContext *hash_context,
                             uint8_t *signature,
+			    uint8_t *recid,
                             uECC_Curve curve);
 
 /* uECC_verify() function.

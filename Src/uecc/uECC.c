@@ -1234,6 +1234,7 @@ static int uECC_sign_with_k(const uint8_t *private_key,
                             unsigned hash_size,
                             uECC_word_t *k,
                             uint8_t *signature,
+			    uint8_t *recid,
                             uECC_Curve curve) {
 
     uECC_word_t tmp[uECC_MAX_WORDS];
@@ -1259,6 +1260,8 @@ static int uECC_sign_with_k(const uint8_t *private_key,
     if (uECC_vli_isZero(p, num_words)) {
         return 0;
     }
+
+    *recid = uECC_vli_testBit(p, num_n_bits); //TODO: test this!
 
     /* If an RNG function was specified, get a random number
        to prevent side channel analysis of k. */
@@ -1307,6 +1310,7 @@ int uECC_sign(const uint8_t *private_key,
               const uint8_t *message_hash,
               unsigned hash_size,
               uint8_t *signature,
+	      uint8_t *recid,
               uECC_Curve curve) {
     uECC_word_t k[uECC_MAX_WORDS];
     uECC_word_t tries;
@@ -1316,7 +1320,7 @@ int uECC_sign(const uint8_t *private_key,
             return 0;
         }
 
-        if (uECC_sign_with_k(private_key, message_hash, hash_size, k, signature, curve)) {
+        if (uECC_sign_with_k(private_key, message_hash, hash_size, k, signature, recid, curve)) {
             return 1;
         }
     }
@@ -1379,6 +1383,7 @@ int uECC_sign_deterministic(const uint8_t *private_key,
                             unsigned hash_size,
                             const uECC_HashContext *hash_context,
                             uint8_t *signature,
+			    uint8_t *recid,
                             uECC_Curve curve) {
     uint8_t *K = hash_context->tmp;
     uint8_t *V = K + hash_context->result_size;
@@ -1432,7 +1437,7 @@ int uECC_sign_deterministic(const uint8_t *private_key,
                 mask >> ((bitcount_t)(num_n_words * uECC_WORD_SIZE * 8 - num_n_bits));
         }
 
-        if (uECC_sign_with_k(private_key, message_hash, hash_size, T, signature, curve)) {
+        if (uECC_sign_with_k(private_key, message_hash, hash_size, T, signature, recid, curve)) {
             return 1;
         }
 
