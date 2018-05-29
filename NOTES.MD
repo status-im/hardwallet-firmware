@@ -17,13 +17,13 @@ To make replacing easier, convenience functions around all calls to these librar
 
 ## HAL - Hardware Abstraction Layer
 
+Current status: no HAL will be used at the moment, since they add extra complexity (especially the ST provided one). Only the CMSIS will be imported (defining constants and a few macros). Below is a list of options that have been considered. We might use the BlueNRG middleware for BLE, but implement our own HAL layer for it.
+
 STM32 chips come with a HAL library which we could use in our firmware to speed up development. The downside of this library is that it only supports STM32 chips and it is quite heavy-weight. It is however very complete in peripherals support.
 
 Another alternative library is [libopencm3](https://github.com/libopencm3/libopencm3) which also supports different MCUs. The downside is that not all pheripherals are supported, so support must be implemented separately.
 
 There is also the possibility to just implement everything from scratch, but this will make development a little longer, at least at the beginning.
-
-This decision will be taken as soon as platform-dependent code will be written (quite soon)
 
 ## LCD Controller
 
