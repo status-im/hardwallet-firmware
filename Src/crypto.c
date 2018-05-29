@@ -25,7 +25,10 @@
 #include "crypto.h"
 #include "cifra/sha3.h"
 #include "uecc/uECC.h"
-//#include "stm32l4xx.h"
+
+#if defined(__arm__)
+#include "stm32l4xx.h"
+#endif
 
 #define MAX_SIGN_RETRY 5
 
@@ -49,7 +52,88 @@ int ecdsa(uint8_t* privkey, uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_
   return 0;
 }
 
-int rng(uint8_t *dst, unsigned int size) {
-  // TODO: implement this
-  return 0;
+#if defined(__arm__)
+int _rng(uint32_t *out) {
+  do {
+    if (RNG->SR & (RNG_SR_SECS|RNG_SR_CECS)) {
+      RNG->SR = 0;
+      return 0;
+    } else if (READ_BIT(RNG->SR, RNG_SR_DRDY)) {
+      *out = RNG->DR;
+      return 1;
+    }
+  } while(1);
 }
+
+int rng(uint8_t *dst, unsigned int size) {
+  SET_BIT(RNG->CR, RNG_CR_RNGEN);
+
+  int word_count = size / 4;
+  int rest = size % 4;
+  int res = 0;
+
+  uint32_t *wdst = (uint32_t *)wdst;
+  for(int i = 0; i < word_count; i++) {
+    if(!_rng(&wdst[i])) {
+      goto end;
+    }
+  }
+
+  uint32_t last;
+  if(!_rng(&last)) {
+    goto end;
+  }
+
+  switch(rest) {
+    case 3:
+      dst[size - 3] = last >> 24;
+      /* no break */
+    case 2:
+      dst[size - 2] = (last >> 16) & 0xff;
+      /* no break */
+    case 1:
+      dst[size - 1] = (last >> 8) & 0xff;
+      /* no break */
+    default:
+      break;
+  }
+
+  res = 1;
+
+end:
+  CLEAR_BIT(RNG->CR, RNG_CR_RNGEN);
+  return res;
+}
+#else
+#include <sys/types.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#ifndef O_CLOEXEC
+    #define O_CLOEXEC 0
+#endif
+
+int rng(uint8_t *dst, unsigned int size) {
+  int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
+  if (fd == -1) {
+    fd = open("/dev/random", O_RDONLY | O_CLOEXEC);
+    if (fd == -1) return 0;
+  }
+
+  char *ptr = (char *)dst;
+  size_t left = size;
+  while (left > 0) {
+    ssize_t bytes_read = read(fd, ptr, left);
+    if (bytes_read <= 0) { // read failed
+      close(fd);
+      return 0;
+    }
+
+    left -= bytes_read;
+    ptr += bytes_read;
+  }
+
+  close(fd);
+  return 1;
+}
+#endif
