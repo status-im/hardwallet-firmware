@@ -42,7 +42,6 @@ Currently the following status codes are defined
 |  0x03  |  Invalid data  |
 |  0x04  | Uninitialized  |
 |  0x10  |   Invalid FW   |
-|  0x10  |   Invalid FW   |
 |  0x3f  |  Unkown error  |
 
 ### Initialize
