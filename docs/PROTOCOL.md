@@ -38,13 +38,12 @@ Currently the following opcodes are defined
 | Opcode |  Command   |
 |--------|------------|
 |  0x00  | Initialize |
-|  0x01  |  Restore   |
-|  0x02  |    Sign    |
-|  0x03  |Get Address |
-|  0x04  |Disable PIN |
-|  0x05  | Enable PIN |
-|  0x06  | Change PIN |
-|  0x07  | Get Status |
+|  0x01  |    Sign    |
+|  0x02  |Get Address |
+|  0x03  |Disable PIN |
+|  0x04  | Enable PIN |
+|  0x05  | Change PIN |
+|  0x06  | Get Status |
 |  0x10  |  Load FW   |
 |  0x11  | Upgrade FW |
 
@@ -70,32 +69,45 @@ Currently the following status codes are defined
 
 ### Initialize
 
-This command is sent to initialize the device. If the device is uninitialized the operation starts immediately. The device autonomously generates a random seed, displays the mnemonics, generates and displays a PIN. It finally generates the master wallet and responds with the its address.
+This command is sent to initialize the device. The initialization is composed of several phase. Each phase is triggered by a separate command so instructions can be displayed on the client and it is possible to resume the initialization procedure if needed. Some phases are alternative to each other and depend on whether the device was already initialized or not and if you want to restore a seed from mnemonics. The initialization phases must be executed in the correct order and no step can be repeated twice (if execution was succesful)
 
-If the device is already initialized, the device will require PIN entry (even if it has been provided before in the same session) for confirmation. This will remove all existing data.
+Phase 0:
+This step authorizes the initialization (by prompting for PIN) and erases all device data. If the device is uninitialized it does not do anything, except move the device to the next phase.
 
-Parameters: None
-Response: The address of the master wallet
-Low battery execution: No
+Phase 1:
+During this phase the seed is generated and mnemonics are displayed to the user.
 
-### Restore
+Phase 2:
+This is alternative to Phase 1. In this case the seed is not generated but the mnemonics are entered on the device
 
-This command is similar to the initialize device command, with the exception that the seed will be entered by the user in form of mnemonics.
+Phase 3:
+During this phase a PIN is generated and shown to the user. The PIN can be changed later after initialization finishes.
 
-Parameters: None
-Response: The address of the master wallet
+Phase 4:
+The master wallet is generated from the seed and its address is sent to the client. After this phase the wallet is initialized and the only possible transition is back to Phase 0.
+
+Parameters: Initialization phase number on 1 byte
+Response: Status only on all phases except Phase 4. On phase 4 the address of the master wallet is sent.
 Low battery execution: No
 
 ### Sign
 
 This command is used to sign a transaction. It requires PIN authorization, unless PIN has been disabled for the given key path. The response contains the RLP-encoded V, R and S (not the entire transaction for bandwidth saving reasons).
 
-The key path is absolute and is used to derive keys according to the BIP32 algorithm. The implementation should keep a cache to avoid recalculating the keys every time. The maximum key path depth is 10.
+The key path is absolute and is used to derive keys according to the algorithms defined in BIP32. The implementation should keep a cache to avoid recalculating the keys every time. The maximum key path depth is 10.
 
 The signature follows EIP-155 and the transaction is expected to contain the chain id (on 1 byte only for now) in place of V and empty R, S. 
 
 Parameters: RLP encoded key path as list of numbers followed by the RLP encoded Ethereum transaction.
 Response: RLP encoded V, R, S
+Low battery execution: Yes
+
+### Get Address
+
+This command is issued to get the address of a wallet with the given key path. The maximum key path depth is 10.
+
+Parameters: RLP encoded key path as list of numbers
+Response: The address of the wallet
 Low battery execution: Yes
 
 ### Disable PIN
@@ -124,7 +136,7 @@ Low battery execution: Yes
 
 ### Get Status
 
-Returns the current state of the device. Details TBD.
+Returns the current state of the device. This will include the initialization status, remaining PIN entry attempts, maybe the list of PIN-less wallets (potential security risk?) etc. The data will be RLP encoded. Exact field structure TBD.
 
 ### Load FW
 
