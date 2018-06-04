@@ -25,7 +25,9 @@ The BLE channel used for the communication must be encrypted and authorized. Mor
 
 ## Application protocol 
 
-The client communicates with the device through a command interface. The client is always the initiator and the application always responds to commands. If no response comes within 15 seconds the request has to be considered as timed out.
+The client communicates with the device through a command interface. The client is always the initiator and the application always responds to commands. The protocol has no timeouts, so the client application must always provide a way for the user to cancel the operation (i.e. stop waiting for a response). The reason for this is that some operation require user input, which can take an indefinite amount of time. A possible solution would be to send heartbeat packets to confirm that the server is still processing the request, however since client and server are by design a few centimeters away from each other and both are in the field of view of the user, it is simpler and more energy-efficient to let the user assess visually if the operation is taking a disproportionate amount of time (especially since no operation will take more than a few seconds, excluding the time for user input) and hit the cancel button.
+
+The maximum APDU size is 4kb.
 
 ### Commands
 
@@ -38,10 +40,11 @@ Currently the following opcodes are defined
 |  0x00  | Initialize |
 |  0x01  |  Restore   |
 |  0x02  |    Sign    |
-|  0x03  |Disable PIN |
-|  0x04  | Enable PIN |
-|  0x05  | Change PIN |
-|  0x06  | Get Status |
+|  0x03  |Get Address |
+|  0x04  |Disable PIN |
+|  0x05  | Enable PIN |
+|  0x06  | Change PIN |
+|  0x07  | Get Status |
 |  0x10  |  Load FW   |
 |  0x11  | Upgrade FW |
 
@@ -49,52 +52,92 @@ Each command will be described in details later in the document
 
 ### Response
 
-All commands generate a response. The exact format of the response depends on the command, but the first byte always carries the opcode of the command which is being responded as well as the transport-level specific details as for the commands. The second byte of the response always carries the status code.
+All commands generate a response. The exact format of the response depends on the command, but the first byte always carries the opcode of the command which is being responded as well as the transport-level specific details as for the commands. The second byte of the response always carries the status code, coded on the lower 6 bits. The 2 uppermost bits are reserved for warning flags (possibly low battery indication).
 
 Currently the following status codes are defined
 
-|  Code  |     Status     |
-|--------|----------------|
-|  0x00  |    No error    |
-|  0x01  |  Unauthorized  |
-|  0x02  | User cancelled |
-|  0x03  |  Invalid data  |
-|  0x04  | Uninitialized  |
-|  0x10  |   Invalid FW   |
-|  0x3f  |  Unkown error  |
+|  Code  |     Status     |                          Description                          |          
+|--------|----------------|---------------------------------------------------------------|
+|  0x00  |    No error    | Correct execution                                             |
+|  0x01  |  Unauthorized  | User did not authorize the operation or failed to provide PIN |
+|  0x02  | User cancelled | User cancelled an operation (expect authorization requests)   |
+|  0x03  |  Invalid data  | The command is malformed                                      |
+|  0x04  | Uninitialized  | The device is unitialized                                     |
+|  0x05  | Limit exceeded | A limit has been execeed (for example amount of pinless paths)|                                   
+|  0x10  |   Invalid FW   | The loaded firmware is malformed or signature does not match  |
+|  0x20  |   Low battery  | Command refused because of low battery                        |
+|  0x3f  |  Unknown error | Unexpected system error                                       |
 
 ### Initialize
 
-TBD
+This command is sent to initialize the device. If the device is uninitialized the operation starts immediately. The device autonomously generates a random seed, displays the mnemonics, generates and displays a PIN. It finally generates the master wallet and responds with the its address.
+
+If the device is already initialized, the device will require PIN entry (even if it has been provided before in the same session) for confirmation. This will remove all existing data.
+
+Parameters: None
+Response: The address of the master wallet
+Low battery execution: No
 
 ### Restore
 
-TBD
+This command is similar to the initialize device command, with the exception that the seed will be entered by the user in form of mnemonics.
+
+Parameters: None
+Response: The address of the master wallet
+Low battery execution: No
 
 ### Sign
 
-TBD
+This command is used to sign a transaction. It requires PIN authorization, unless PIN has been disabled for the given key path. The response contains the RLP-encoded V, R and S (not the entire transaction for bandwidth saving reasons).
+
+The key path is absolute and is used to derive keys according to the BIP32 algorithm. The implementation should keep a cache to avoid recalculating the keys every time. The maximum key path depth is 10.
+
+The signature follows EIP-155 and the transaction is expected to contain the chain id (on 1 byte only for now) in place of V and empty R, S. 
+
+Parameters: RLP encoded key path as list of numbers followed by the RLP encoded Ethereum transaction.
+Response: RLP encoded V, R, S
+Low battery execution: Yes
 
 ### Disable PIN
 
-TBD
+Disables PIN entry for the given key path. The maximum key path depth is 10. The maximum amount key paths for which PIN entry can be disabled at the same time is 10. When the PIN entry is disabled a simple yes/no confirmation will be required instead.
+
+Parameters: RLP encoded key path as list of numbers
+Response: Only status code
+Low battery execution: Yes
 
 ### Enable PIN
 
-TBD
+Enables PIN entry for the given key path. The maximum key path depth is 10. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds.
+
+Parameters: RLP encoded key path as list of numbers
+Response: Only status code
+Low battery execution: Yes
 
 ### Change PIN
 
-TBD
+Changes the current PIN. This happens completely on the device so the command is only used to trigger the change. This first asks for the current PIN, then for a new one which must be entered twice.
+
+Parameters: None
+Response: Status code only
+Low battery execution: Yes
 
 ### Get Status
 
-TBD
+Returns the current state of the device. Details TBD.
 
 ### Load FW
 
-TBD
+Loads and writes to flash a page of firmware update. The data is not checked in any way and is simply written to the page specified by the command (relative to the firmware update area). The data length must be equal or less than the size of a physical page (2kb with the current chip). The page will always be fully programmed. If the data is shorter than the page, the missing bytes will be zeroed.
+
+Parameters: page number on 1 byte, data length on 2 bytes (least significant byte first) followed by the actual data.
+Response: Status code only
+Low battery execution: No
 
 ### Upgrade FW
 
-TBD
+Triggers a firmware upgrade, using the image previously loaded with the Load FW command. This command verifies the firmware's signature and if succesful reboots, so that the bootloader can perform the upgrade. When the device responds to this command "No error", it only means that the reboot has been performed, not that the upgrade is finished.
+
+Parameters: None
+Response: Status code only
+Low battery execution: No
