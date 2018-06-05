@@ -72,10 +72,10 @@ Currently the following status codes are defined
 This command is sent to initialize the device. The initialization is composed of several phase. Each phase is triggered by a separate command so instructions can be displayed on the client and it is possible to resume the initialization procedure if needed. Some phases are alternative to each other and depend on whether the device was already initialized or not and if you want to restore a seed from mnemonics. The initialization phases must be executed in the correct order and no step can be repeated twice (if execution was succesful)
 
 Phase 0:
-This step authorizes the initialization (by prompting for PIN) and erases all device data. If the device is uninitialized it does not do anything, except move the device to the next phase.
+This step authorizes the initialization (by prompting for PIN) and erases all device data. This step is only necessary if the decide has been previously initialized.
 
 Phase 1:
-During this phase the seed is generated and mnemonics are displayed to the user.
+During this phase the seed is generated and mnemonic are displayed to the user.
 
 Phase 2:
 This is alternative to Phase 1. In this case the seed is not generated but the mnemonics are entered on the device
@@ -86,9 +86,9 @@ During this phase a PIN is generated and shown to the user. The PIN can be chang
 Phase 4:
 The master wallet is generated from the seed and its address is sent to the client. After this phase the wallet is initialized and the only possible transition is back to Phase 0.
 
-Parameters: Initialization phase number on 1 byte
-Response: Status only on all phases except Phase 4. On phase 4 the address of the master wallet is sent.
-Low battery execution: No
+* Parameters: Initialization phase number on 1 byte. In phase 1 or 2 the length of the checksum of the mnemonic (between 4 and 8) on the next byte, which determines the length of the sentence in words.
+* Response: Status only on all phases except Phase 4. On phase 4 the address of the master wallet is sent.
+* Low battery execution: No
 
 ### Sign
 
@@ -98,41 +98,41 @@ The key path is absolute and is used to derive keys according to the algorithms 
 
 The signature follows EIP-155 and the transaction is expected to contain the chain id (on 1 byte only for now) in place of V and empty R, S. 
 
-Parameters: RLP encoded key path as list of numbers followed by the RLP encoded Ethereum transaction.
-Response: RLP encoded V, R, S
-Low battery execution: Yes
+* Parameters: RLP encoded key path as list of numbers followed by the RLP encoded Ethereum transaction.
+* Response: RLP encoded V, R, S
+* Low battery execution: Yes
 
 ### Get Address
 
 This command is issued to get the address of a wallet with the given key path. The maximum key path depth is 10.
 
-Parameters: RLP encoded key path as list of numbers
-Response: The address of the wallet
-Low battery execution: Yes
+* Parameters: RLP encoded key path as list of numbers
+* Response: The address of the wallet
+* Low battery execution: Yes
 
 ### Disable PIN
 
 Disables PIN entry for the given key path. The maximum key path depth is 10. The maximum amount key paths for which PIN entry can be disabled at the same time is 10. When the PIN entry is disabled a simple yes/no confirmation will be required instead.
 
-Parameters: RLP encoded key path as list of numbers
-Response: Only status code
-Low battery execution: Yes
+* Parameters: RLP encoded key path as list of numbers
+* Response: Only status code
+* Low battery execution: Yes
 
 ### Enable PIN
 
 Enables PIN entry for the given key path. The maximum key path depth is 10. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds.
 
-Parameters: RLP encoded key path as list of numbers
-Response: Only status code
-Low battery execution: Yes
+* Parameters: RLP encoded key path as list of numbers
+* Response: Only status code
+* Low battery execution: Yes
 
 ### Change PIN
 
 Changes the current PIN. This happens completely on the device so the command is only used to trigger the change. This first asks for the current PIN, then for a new one which must be entered twice.
 
-Parameters: None
-Response: Status code only
-Low battery execution: Yes
+* Parameters: None
+* Response: Status code only
+* Low battery execution: Yes
 
 ### Get Status
 
@@ -142,14 +142,14 @@ Returns the current state of the device. This will include the initialization st
 
 Loads and writes to flash a page of firmware update. The data is not checked in any way and is simply written to the page specified by the command (relative to the firmware update area). The data length must be equal or less than the size of a physical page (2kb with the current chip). The page will always be fully programmed. If the data is shorter than the page, the missing bytes will be zeroed.
 
-Parameters: page number on 1 byte, data length on 2 bytes (least significant byte first) followed by the actual data.
-Response: Status code only
-Low battery execution: No
+* Parameters: page number on 1 byte, data length on 2 bytes (least significant byte first) followed by the actual data.
+* Response: Status code only
+* Low battery execution: No
 
 ### Upgrade FW
 
 Triggers a firmware upgrade, using the image previously loaded with the Load FW command. This command verifies the firmware's signature and if succesful reboots, so that the bootloader can perform the upgrade. When the device responds to this command "No error", it only means that the reboot has been performed, not that the upgrade is finished.
 
-Parameters: None
-Response: Status code only
-Low battery execution: No
+* Parameters: None
+* Response: Status code only
+* Low battery execution: No

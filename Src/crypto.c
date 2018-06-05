@@ -23,7 +23,9 @@
  */
 
 #include "crypto.h"
+#include "cifra/sha2.h"
 #include "cifra/sha3.h"
+#include "cifra/hmac.h"
 #include "uecc/uECC.h"
 
 #if defined(__arm__)
@@ -37,6 +39,21 @@ void kekkac256(uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
   cf_sha3_256_init(&ctx);
   cf_sha3_256_update(&ctx, data, len);
   cf_sha3_256_digest_final(&ctx, hash);
+}
+
+void sha256(uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
+  cf_sha256_context ctx;
+  cf_sha256_init(&ctx);
+  cf_sha256_update(&ctx, data, len);
+  cf_sha256_digest_final(&ctx, hash);
+}
+
+void hmac_sha512(uint8_t* key, int keylen, uint8_t* data, int len, uint8_t hash[SHA_512_LEN]) {
+  cf_hmac(key, keylen, data, len, hash, &cf_sha512);
+}
+
+void pbkdf2_sha512(uint8_t *pw, int pwlen, uint8_t *salt, int saltlen, uint32_t iterations, uint8_t *out, int outlen) {
+  cf_pbkdf2_hmac(pw, pwlen, salt, saltlen, iterations, out, outlen, &cf_sha512);
 }
 
 int ecdsa(uint8_t* privkey, uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]) {
