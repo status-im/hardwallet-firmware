@@ -32,11 +32,11 @@
 #define SHA_512_LEN 64
 #define ECDSA_256_SIG_LEN 64
 
-void kekkac256(uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]);
-void sha256(uint8_t* data, int len, uint8_t hash[SHA_256_LEN]);
-void hmac_sha512(uint8_t* key, int keylen, uint8_t* data, int len, uint8_t hash[SHA_512_LEN]);
-void pbkdf2_sha512(uint8_t *pw, int pwlen, uint8_t *salt, int saltlen, uint32_t iterations, uint8_t *out, int outlen);
-int ecdsa(uint8_t* privkey, uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]);
+void kekkac256(const uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]);
+void sha256(const uint8_t* data, int len, uint8_t hash[SHA_256_LEN]);
+void hmac_sha512(const uint8_t* key, int keylen, const uint8_t* data, int len, uint8_t hash[SHA_512_LEN]);
+void pbkdf2_sha512(const uint8_t *pw, int pwlen, const uint8_t *salt, int saltlen, uint32_t iterations, uint8_t *out, int outlen);
+int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]);
 int rng(uint8_t *dst, unsigned int size);
 
 #endif /* CRYPTO_H_ */

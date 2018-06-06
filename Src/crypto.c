@@ -35,29 +35,29 @@
 
 #define MAX_SIGN_RETRY 5
 
-void kekkac256(uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
+void kekkac256(const uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
   cf_sha3_context ctx;
   cf_sha3_256_init(&ctx);
   cf_sha3_256_update(&ctx, data, len);
   cf_sha3_256_digest_final(&ctx, hash);
 }
 
-void sha256(uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
+void sha256(const uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
   cf_sha256_context ctx;
   cf_sha256_init(&ctx);
   cf_sha256_update(&ctx, data, len);
   cf_sha256_digest_final(&ctx, hash);
 }
 
-void hmac_sha512(uint8_t* key, int keylen, uint8_t* data, int len, uint8_t hash[SHA_512_LEN]) {
+void hmac_sha512(const uint8_t* key, int keylen, const uint8_t* data, int len, uint8_t hash[SHA_512_LEN]) {
   cf_hmac(key, keylen, data, len, hash, &cf_sha512);
 }
 
-void pbkdf2_sha512(uint8_t *pw, int pwlen, uint8_t *salt, int saltlen, uint32_t iterations, uint8_t *out, int outlen) {
+void pbkdf2_sha512(const uint8_t *pw, int pwlen, const uint8_t *salt, int saltlen, uint32_t iterations, uint8_t *out, int outlen) {
   cf_pbkdf2_hmac(pw, pwlen, salt, saltlen, iterations, out, outlen, &cf_sha512);
 }
 
-int ecdsa(uint8_t* privkey, uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]) {
+int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]) {
   uECC_set_rng(&rng);
   uECC_Curve curve = uECC_secp256k1();
 

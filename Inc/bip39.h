@@ -28,15 +28,16 @@
 #include <stdint.h>
 
 #define BIP39_SEED_LEN 64
+#define BIP39_MAX_MNEMO 24
 
 int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic);
-uint16_t bip39_find_word(uint8_t* word);
-int bip39_verify(int cslen, uint16_t* mnemonic);
-void bip39_render_mnemonic(uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen);
+int16_t bip39_find_word(const char* word);
+int bip39_verify(int cslen, const uint16_t* mnemonic);
+void bip39_render_mnemonic(const uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen);
 
 /**
  * Generates a binary seed from the given mnemonic string, protected by an optional passphrase long at most 64 bytes.
  */
-int bip39_generate_seed(uint8_t* mnstr, int mnlen, uint8_t* passphrase, int pplen, uint8_t seed[BIP39_SEED_LEN]);
+int bip39_generate_seed(const uint8_t* mnstr, int mnlen, const uint8_t* passphrase, int pplen, uint8_t seed[BIP39_SEED_LEN]);
 
 #endif /* BIP39_H_ */
