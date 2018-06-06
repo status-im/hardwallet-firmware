@@ -27,7 +27,7 @@
 
 #define BIP39_WORDLIST_LEN 2048
 
-static const char* const wordlist[BIP39_WORDLIST_LEN] = {
+static const char* const bip39_wordlist[BIP39_WORDLIST_LEN] = {
 "abandon",
 "ability",
 "able",

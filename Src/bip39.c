@@ -25,26 +25,103 @@
 #include "bip39.h"
 #include "bip39_english.h"
 #include "crypto.h"
+#include <string.h>
+#include "handy.h"
 
 #define BIP39_PBKDF2_ITERATIONS 2048
+#define BIP39_MIN_CS_LEN 4
+#define BIP39_MAX_CS_LEN 8
 
 int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic) {
+  if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
+  int entlen = cslen * 4;
+  uint8_t ent[(BIP39_MAX_CS_LEN * 4) + SHA_256_LEN];
+  if (!rng(ent, entlen)) return -1;
+  sha256(ent, entlen, &ent[entlen]);
 
+  int mlen = cslen * 3;
+  int i, j, idx;
+
+  for (i = 0; i < mlen; i++) {
+    idx = 0;
+	for (j = 0; j < 11; j++) {
+	  idx <<= 1;
+	  idx += (ent[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
+	}
+
+	mnemonic[i] = idx;
+  }
+
+  mem_clean(ent, sizeof(ent));
+  return mlen;
 }
 
-uint16_t bip39_find_word(uint8_t* word) {
+int16_t bip39_find_word(const char* word) {
+  int16_t low = 0;
+  int16_t high = BIP39_WORDLIST_LEN - 1;
 
+  // no mnemonic is shorter than 4 bytes (3 letters + string terminator) and 4 bytes is enough to
+  // distinguish a word from another. For this reason, we can compare the words as if they were integers.
+  uint32_t x = word[3] | (word[2] << 8) | (word[1] << 16) | (word[0] << 24);
+
+  while(low <= high) {
+	int16_t mid = (low + high) / 2;
+    uint32_t v = bip39_wordlist[mid][3] | (bip39_wordlist[mid][2] << 8) | (bip39_wordlist[mid][1] << 16) | (bip39_wordlist[mid][0] << 24);
+
+    if (x < v) {
+      high = mid - 1;
+    } else if (x > v) {
+      low = mid + 1;
+    } else {
+      return mid;
+    }
+  }
+
+  return -1;
 }
 
-int bip39_verify(int cslen, uint16_t* mnemonic) {
+int bip39_verify(int cslen, const uint16_t* mnemonic) {
+  if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
+  uint8_t ent[(BIP39_MAX_CS_LEN * 4) + 1 + SHA_256_LEN];
+  int entlen = (cslen * 4);
+  int mlen = cslen * 3;
 
+  int bi = 0;
+  mem_clean(ent, entlen + 1);
+
+  for (int i = 0; i < mlen; i++) {
+    uint16_t k = mnemonic[i];
+    for (int ki = 0; ki < 11; ki++) {
+      if (k & (1 << (10 - ki))) {
+        ent[bi / 8] |= 1 << (7 - (bi % 8));
+	  }
+
+      bi++;
+    }
+  }
+
+  sha256(ent, entlen, &ent[entlen+1]);
+
+  uint8_t mask = 0xff00 >> cslen;
+  return (ent[entlen] & mask) == (ent[entlen + 1] & mask) ? 0 : -1;
 }
 
-void bip39_render_mnemonic(uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen) {
+void bip39_render_mnemonic(const uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen) {
+  *mnlen = 0;
 
+  for(int i = 0; i < len; i++) {
+    const char *word = bip39_wordlist[mnemonic[i]];
+    while(*word != '\0') {
+      mnstr[(*mnlen)++] = *word++;
+    }
+
+    mnstr[(*mnlen)++] = ' ';
+  }
+
+  mnstr[--(*mnlen)] = '\0';
 }
 
-int bip39_generate_seed(uint8_t* mnstr, int mnlen, uint8_t* passphrase, int pplen, uint8_t seed[BIP39_SEED_LEN]) {
+int bip39_generate_seed(const uint8_t* mnstr, int mnlen, const uint8_t* passphrase, int pplen, uint8_t seed[BIP39_SEED_LEN]) {
   if (pplen > BIP39_SEED_LEN) return -1;
 
   uint8_t salt[BIP39_SEED_LEN + 8];
