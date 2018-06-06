@@ -26,6 +26,7 @@
 #include "cifra/sha2.h"
 #include "cifra/sha3.h"
 #include "cifra/hmac.h"
+#include "cifra/pbkdf2.h"
 #include "uecc/uECC.h"
 
 #if defined(__arm__)
@@ -69,7 +70,6 @@ int ecdsa(uint8_t* privkey, uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_
   return 0;
 }
 
-#if defined(__arm__)
 int _rng(uint32_t *out) {
   do {
     if (RNG->SR & (RNG_SR_SECS|RNG_SR_CECS)) {
@@ -121,36 +121,3 @@ end:
   CLEAR_BIT(RNG->CR, RNG_CR_RNGEN);
   return res;
 }
-#else
-#include <sys/types.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#ifndef O_CLOEXEC
-    #define O_CLOEXEC 0
-#endif
-
-int rng(uint8_t *dst, unsigned int size) {
-  int fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
-  if (fd == -1) {
-    fd = open("/dev/random", O_RDONLY | O_CLOEXEC);
-    if (fd == -1) return 0;
-  }
-
-  char *ptr = (char *)dst;
-  size_t left = size;
-  while (left > 0) {
-    ssize_t bytes_read = read(fd, ptr, left);
-    if (bytes_read <= 0) { // read failed
-      close(fd);
-      return 0;
-    }
-
-    left -= bytes_read;
-    ptr += bytes_read;
-  }
-
-  close(fd);
-  return 1;
-}
-#endif
