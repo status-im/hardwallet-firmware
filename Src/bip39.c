@@ -44,12 +44,12 @@ int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic) {
 
   for (i = 0; i < mlen; i++) {
     idx = 0;
-	for (j = 0; j < 11; j++) {
-	  idx <<= 1;
-	  idx += (ent[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
-	}
+    for (j = 0; j < 11; j++) {
+      idx <<= 1;
+      idx += (ent[(i * 11 + j) / 8] & (1 << (7 - ((i * 11 + j) % 8)))) > 0;
+    }
 
-	mnemonic[i] = idx;
+    mnemonic[i] = idx;
   }
 
   mem_clean(ent, sizeof(ent));
@@ -65,7 +65,7 @@ int16_t bip39_find_word(const char* word) {
   uint32_t x = word[3] | (word[2] << 8) | (word[1] << 16) | (word[0] << 24);
 
   while(low <= high) {
-	int16_t mid = (low + high) / 2;
+    int16_t mid = (low + high) / 2;
     uint32_t v = bip39_wordlist[mid][3] | (bip39_wordlist[mid][2] << 8) | (bip39_wordlist[mid][1] << 16) | (bip39_wordlist[mid][0] << 24);
 
     if (x < v) {
@@ -94,7 +94,7 @@ int bip39_verify(int cslen, const uint16_t* mnemonic) {
     for (int ki = 0; ki < 11; ki++) {
       if (k & (1 << (10 - ki))) {
         ent[bi / 8] |= 1 << (7 - (bi % 8));
-	  }
+      }
 
       bi++;
     }
