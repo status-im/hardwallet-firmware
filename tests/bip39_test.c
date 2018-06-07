@@ -15,7 +15,7 @@ const char *passphrase = "a test passpharase";
 
 void sha256(const uint8_t* data, int len, uint8_t hash[SHA_256_LEN]) {
   if (len == 16 && !memcmp(data, rand128, len)) {
-	memcpy(hash, sha256_rand128, SHA_256_LEN);
+    memcpy(hash, sha256_rand128, SHA_256_LEN);
   } else {
     memset(hash, 0xff, SHA_256_LEN);
   }
@@ -35,7 +35,7 @@ void pbkdf2_sha512(const uint8_t *pw, int pwlen, const uint8_t *salt, int saltle
 
 int rng(uint8_t *dst, unsigned int size) {
   if (size == 16) {
-	memcpy(dst, rand128, size);
+    memcpy(dst, rand128, size);
     return 1;
   }
 
@@ -82,10 +82,10 @@ void test_bip39_generate_seed(void) {
 }
 
 TEST_LIST = {
-   { "bip39_generate_mnemonic", test_bip39_generate_mnemonic },
-   { "bip39_find_word", test_bip39_find_word },
-   { "bip39_verify", test_bip39_verify },
-   { "bip39_render_mnemonic", test_bip39_render_mnemonic },
-   { "bip39_generate_seed", test_bip39_generate_seed },
-   { 0 }
+    { "bip39_generate_mnemonic", test_bip39_generate_mnemonic },
+    { "bip39_find_word", test_bip39_find_word },
+    { "bip39_verify", test_bip39_verify },
+    { "bip39_render_mnemonic", test_bip39_render_mnemonic },
+    { "bip39_generate_seed", test_bip39_generate_seed },
+    { 0 }
 };

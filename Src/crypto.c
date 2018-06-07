@@ -102,22 +102,22 @@ int rng(uint8_t *dst, unsigned int size) {
   }
 
   switch(rest) {
-    case 3:
-      dst[size - 3] = last >> 24;
-      /* no break */
-    case 2:
-      dst[size - 2] = (last >> 16) & 0xff;
-      /* no break */
-    case 1:
-      dst[size - 1] = (last >> 8) & 0xff;
-      /* no break */
-    default:
-      break;
+  case 3:
+    dst[size - 3] = last >> 24;
+    /* no break */
+  case 2:
+    dst[size - 2] = (last >> 16) & 0xff;
+    /* no break */
+  case 1:
+    dst[size - 1] = (last >> 8) & 0xff;
+    /* no break */
+  default:
+    break;
   }
 
   res = 1;
 
-end:
+  end:
   CLEAR_BIT(RNG->CR, RNG_CR_RNGEN);
   return res;
 }
