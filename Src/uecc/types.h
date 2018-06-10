@@ -3,17 +3,9 @@
 #ifndef _UECC_TYPES_H_
 #define _UECC_TYPES_H_
 
-#define uECC_PLATFORM uECC_arm_thumb2
-
 #ifndef uECC_PLATFORM
-    #if __AVR__
-        #define uECC_PLATFORM uECC_avr
-    #elif defined(__thumb2__) || defined(_M_ARMT) /* I think MSVC only supports Thumb-2 targets */
+    #if defined(__arm__) || defined(_M_ARM)
         #define uECC_PLATFORM uECC_arm_thumb2
-    #elif defined(__thumb__)
-        #define uECC_PLATFORM uECC_arm_thumb
-    #elif defined(__arm__) || defined(_M_ARM)
-        #define uECC_PLATFORM uECC_arm
     #elif defined(__aarch64__)
         #define uECC_PLATFORM uECC_arm64
     #elif defined(__i386__) || defined(_M_IX86) || defined(_X86_) || defined(__I86__)

@@ -1234,7 +1234,7 @@ static int uECC_sign_with_k(const uint8_t *private_key,
                             unsigned hash_size,
                             uECC_word_t *k,
                             uint8_t *signature,
-			    uint8_t *recid,
+			                uint8_t *recid,
                             uECC_Curve curve) {
 
     uECC_word_t tmp[uECC_MAX_WORDS];
@@ -1298,6 +1298,8 @@ static int uECC_sign_with_k(const uint8_t *private_key,
     if (uECC_vli_numBits(s, num_n_words) > (bitcount_t)curve->num_bytes * 8) {
         return 0;
     }
+
+    //TODO: BIP-62, fix S to avoid malleability
 #if uECC_VLI_NATIVE_LITTLE_ENDIAN
     bcopy((uint8_t *) signature + curve->num_bytes, (uint8_t *) s, curve->num_bytes);
 #else
