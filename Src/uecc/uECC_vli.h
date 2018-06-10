@@ -9,7 +9,7 @@
 /* Functions for raw large-integer manipulation. These are only available
    if uECC.c is compiled with uECC_ENABLE_VLI_API defined to 1. */
 #ifndef uECC_ENABLE_VLI_API
-    #define uECC_ENABLE_VLI_API 0
+    #define uECC_ENABLE_VLI_API 1
 #endif
 
 #ifdef __cplusplus
