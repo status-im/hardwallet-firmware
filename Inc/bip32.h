@@ -27,17 +27,18 @@
 
 #include <stdint.h>
 
+#define KEY_COMPONENT_LEN 32
+
 typedef struct {
-  uint8_t key[32];
-  uint8_t chain[32];
+  uint8_t key[KEY_COMPONENT_LEN];
+  uint8_t chain[KEY_COMPONENT_LEN];
 } bip32_priv_key_t;
 
 typedef struct {
-  uint8_t x[32];
-  uint8_t y[32];
+  uint8_t x[KEY_COMPONENT_LEN];
+  uint8_t y[KEY_COMPONENT_LEN];
 } bip32_pub_key_t;
 
-int bip32_ckd_private(const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv);
-int bip32_make_pub(const bip32_priv_key_t* priv_key, bip32_pub_key_t* pub_key);
+int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub);
 
 #endif /* BIP32_H_ */
