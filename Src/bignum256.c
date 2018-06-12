@@ -54,8 +54,8 @@ bignum256_t* bignum256_secp256k1_n() {
   return (bignum256_t *) uECC_curve_n(curve);
 }
 
-void bignum256_secp256k1_publickey(const bignum256_t* priv_key, bignum256_t* out_pub) {
+void bignum256_secp256k1_publickey(const bignum256_t* priv_key, bignum256_t out_pub[2]) {
   uECC_Curve curve = uECC_secp256k1();
-  uECC_point_mult(out_pub->_v, uECC_curve_G(curve), priv_key->_v, curve);
+  uECC_point_mult((uECC_word_t *)out_pub, uECC_curve_G(curve), priv_key->_v, curve);
 }
 

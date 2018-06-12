@@ -28,7 +28,8 @@
 #include <string.h>
 
 int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub) {
-  uint8_t tmp[KEY_COMPONENT_LEN * 3];
+  uint32_t _tmp[(KEY_COMPONENT_LEN * 3) / 4]; // declare for word access
+  uint8_t *tmp = (uint8_t *) _tmp;
 
   if ((i & 0x80000000) != 0) {
     // hardened key
