@@ -4,7 +4,7 @@ The device has a dedicated area for storing data, which is 1/4 of the total devi
 
 The device uses flash storage, which is not byte-programmable so we must keep in mind the following properties:
 
-1. The minimum amount of data that can be written at once is a double-word (64 bytes)
+1. The minimum amount of data that can be written at once is a double-word (64 bits)
 2. The size of a flash page is 2k
 3. Data cannot be rewritten once programmed, but can be zeroed in double-word chunks
 4. Flash pages can only be erased as a whole block (2k at once), this is the only way to reprogram
@@ -22,7 +22,7 @@ What we need to store on device is:
 5. All wallets derived using BIP32. Since these can be re-generated from the master wallet, this can be considered to be a cache.
 6. The list of PIN-less wallet paths
 
-Of these, only the master wallet cannot be changed during normal usage. Changing it will only possible through a device initialization/restore, which erases the entire storage. The other keys can also not be changed but new ones can be added, and eventually we might need to delete old ones to make place for new ones.
+Of these, only the master wallet cannot be changed during normal usage. Changing it is only possible through a device initialization/restore, which erases the entire storage. The other keys can also not be changed but new ones can be added, and eventually we might need to delete old ones to make place for new ones.
 
 The order in which these are listed is not related to the actual memory layout.
 
@@ -37,7 +37,7 @@ The order in which these are listed is not related to the actual memory layout.
 7. sensitive data will be zeroed out when a newer value is written.
 8. when writing to flash, interrupts must be disabled.
 
-This storage strategy makes reading slower, since you must search the data first. However the performance impact should not be noticeable to the user. Since the we have a relatively abundant memory and small amount of data to write, erase operations should be quite rare.
+This storage strategy makes reading slower, since you must search the data first. However the performance impact should not be noticeable to the user. Since we have a relatively abundant memory and small amount of data to write, erase operations should be quite rare.
 
 ## Page header
 
@@ -80,7 +80,7 @@ On the current hardware, 130 pages are allocated for the user data area. The cur
     |-----------------------------------|
     |             PIN data              | Page 1
     |-----------------------------------|
-    |            Counter area           | Page 3-4
+    |            Counter area           | Page 2-3
     |-----------------------------------|
     |                                   |
     |        PIN-less wallet list       | Page 4-6
@@ -172,7 +172,7 @@ When veryfing the PIN, the software must scan the area until it reaches an empty
 
 __Magic number__: 0x43 0x54 0x01 0x0X
 
-This area provides a place to keep counters. An entry is 8 bytes long and the size of each individual counter can vary from 4 to 64 bits (in 4-bits increments). At the moment, only the PIN retry counter in the lowest 4 bits of the entry is stored (giving a maximum theoretical retry count of 15, but pratically we want to keep it between 3 and 10). Reading and updating the counter entry works exactly as with the PIN entry. Each page can fit exactly 255 updates, but in this case 2 pages are allocated. When rewriting, the current counters value must be the first entry of the first page, while the rest must remain in the erased status.
+This area provides a place to keep counters. An entry is 8 bytes long and the size of each individual counter can vary from 4 to 64 bits (in 4-bits increments). At the moment, only the PIN retry counter in the lowest 4 bits of the entry is stored (giving a maximum theoretical retry count of 15, but pratically we want to keep it between 3 and 10). Reading and updating the counter entry works exactly as with the PIN entry. Each page can fit exactly 255 updates, but in this case 2 pages are allocated. When rewriting, the current counters value must be the first entry of the first page, while the rest must remain in the erased state.
 
 ## PIN-less list
 
