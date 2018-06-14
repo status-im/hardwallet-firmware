@@ -19,8 +19,8 @@ What we need to store on device is:
 2. Data to verify the PIN
 3. The counter of wrong PIN insertions
 4. Possibly some settings/metadata
-5. All keys derived using BIP32. Since these can be re-generated from the master key, this can be considered to be a cache.
-6. The list of PIN-less key paths
+5. All wallets derived using BIP32. Since these can be re-generated from the master wallet, this can be considered to be a cache.
+6. The list of PIN-less wallet paths
 
 Of these, only the master wallet cannot be changed during normal usage. Changing it will only possible through a device initialization/restore, which erases the entire storage. The other keys can also not be changed but new ones can be added, and eventually we might need to delete old ones to make place for new ones.
 
@@ -78,10 +78,12 @@ On the current hardware, 130 pages are allocated for the user data area. The cur
     |===================================| 
     |          Write-once data          | Page 0
     |-----------------------------------|
-    |             PIN data              | Page 1-2
+    |             PIN data              | Page 1
+    |-----------------------------------|
+    |            Counter area           | Page 3-4
     |-----------------------------------|
     |                                   |
-    |           PIN-less list           | Page 3-6
+    |        PIN-less wallet list       | Page 4-6
     |                                   |
     |-----------------------------------|
     |                                   |
@@ -112,7 +114,99 @@ On the current hardware, 130 pages are allocated for the user data area. The cur
 
 This allocation is preliminary and can change during the development phase. There is a lot of room for future expansion.
 
-## Page description
+## Security
 
-TODO: describe how each page type is used.
+All sensitive data will be encrypted using AES-128 in CBC mode using a random master key generated during device initialization. This means a 16 byte overhead for the random IV which needs to be stored along the ciphertext.
 
+The master key needs to be stored in a secure area. The protection offered by the STM32L4 is not unbreakable, but the target STM32WB chip offers a "customer key storage" area. We do not have more details on this at the moment, but this is probably an area protected from physical attacks and this is where the master key will be stored. For now it will just be stored in regular flash. This is totally insecure if an attacker somehow manages to bypass read-protection but for the prototype it is fine.
+
+## Write-once data area
+
+__Magic number__: 0x57 0x4F 0x01 0x00
+
+The area reserved for write-once data contains data structures of fixed length at predetermined offsets. This data is generated and written during device initialization and is never updated. The first 8 bytes contain a header like all other pages.
+
+    |===================================| 
+    |    Magic (0x57 0x4F 0x01 0x00)    | byte 0-3
+    |-----------------------------------|
+    |            Write counter          | byte 4-7
+    |-----------------------------------|
+    |     Master Wallet Public Key      | byte 8-40
+    |-----------------------------------|
+    |             Random data           | byte 41-51
+    |-----------------------------------|
+    |Master Wallet Priv Key (encrypted) | byte 52-83
+    |-----------------------------------|
+    |      Master Wallet Address        | byte 84-103
+    |-----------------------------------|
+    |              Reserved             | byte 104-2031
+    |-----------------------------------| 
+    |  PIN encryption key (TEMPORARY!)  | byte 2016-2041
+    |-----------------------------------| 
+    | Master encryption key (TEMPORARY!)| byte 2032-2047
+    |===================================|
+
+The public key is stored in its compressed form. The IV used for encryption is composed of the last 5 bytes of the public key concatenated to the 11 random bytes following it.
+
+
+## PIN data area
+
+__Magic number__: 0x50 0x4e 0x01 0x00
+
+The PIN data area is used to verify the PIN. The PIN could be stored plain, since if an attacker manages to read out the memory the PIN does not offer any protection. However, since the user might be using the same PIN for other applications, we do not want it to be recoverable. Hashing would be possible, but brute-forcing the hash would be extremely easy due to the small amount of possible PINs and does not even require pre-built tables, so a salt would not help.
+
+For this reason, the PIN will be encrypted using AES-CBC mode using random IV and padded with zeros. To verify PIN correctness, the provided PIN will be padded and encrypted using the same IV as the current PIN. Then byte-wise comparison of the 16-byte block will be performed. All 16 bytes will always be compared to avoid side-channel attacks. We could have saved 16-bytes and the need to generate an IV by using AES in ECB mode. While this would be secure (since we are using a single block), it would reveal patterns like and old PIN being set again, etc.
+
+The structure of a PIN is as follows, bytes 16-31 are encrypted.
+
+    b      0-15            16          17-X       X-31
+    |======================================================| 
+    |       IV       | PIN length |     PIN   |  Padding   |
+    |======================================================| 
+
+Where X is determined by PIN length. The maximum length of the PIN is 15 characters, but it will most likely be between 4 and 6.
+
+When veryfing the PIN, the software must scan the area until it reaches an empty PIN area (i.e: 8 consecutive 0xff bytes or the end of the area). The PIN before the empty area is the current one which must be verified. This way, changing PIN means appending a new PIN after the current one. Since a PIN is 32 bytes long and we have 2040 available bytes, we can change PIN 63 times (leaving a 24 spare bytes at the end). If the PIN is changed again, the page must be rewritten as described in the page rewriting chapter. In this case only the new PIN will be written in the fresh page.
+
+## Counter area
+
+__Magic number__: 0x43 0x54 0x01 0x0X
+
+This area provides a place to keep counters. An entry is 8 bytes long and the size of each individual counter can vary from 4 to 64 bits (in 4-bits increments). At the moment, only the PIN retry counter in the lowest 4 bits of the entry is stored (giving a maximum theoretical retry count of 15, but pratically we want to keep it between 3 and 10). Reading and updating the counter entry works exactly as with the PIN entry. Each page can fit exactly 255 updates, but in this case 2 pages are allocated. When rewriting, the current counters value must be the first entry of the first page, while the rest must remain in the erased status.
+
+## PIN-less list
+
+__Magic number__: 0x4e 0x50 0x01 0x0X
+
+This is a list of wallet paths which do not require a PIN when signing. Each entry is exactly 40 bytes long, allowing 9 levels of nesting in the hierarchy below the master wallet. The length does not change even if less than 9 levels are used. The structure is as follows
+
+    b   0-3       4-7       8-11     12-15     16-19    20-23     24-27     28-31     32-35     36-39
+    |===================================================================================================| 
+    |  Count  | Level 1 | Level 2 | Level 3 | Level 4 | Level 5 | Level 6 | Level 7 | Level 8 | Level 9 |
+    |===================================================================================================| 
+
+This first word is a counter of how many levels this entry contains (higher ones are to be ignored). If this value is 0xffffffff it means that the entry is empty and can be programmed. If this value is 0x00000000 it means that the entry has been erased and must be ignored.
+
+Adding an entry to the list means finding an empty spot by scanning the pages sequentially and finding the first entry with count value  0xffffffff. Duplicate entries are not allowed. Exactly 51 entries fit on one page. Erasing an entry from the list means overwriting the first double word with zeros.
+
+When the list is full, an attempt must be made to compact the list (i.e: generate a new list without the erased entries) and add the new item. If this is not possible (there are no erased entries), an error condition should be returned. Using 3 pages, the list can be 153 entries long, which is probably way more than needed.
+
+## Settings
+
+__Magic number__: 0x53 0x31 0x01 0x0X
+
+Settings work the same as with the counters area. Each entry (size tbd, must be a multiple of 8 bytes) contains a copy of all settings. Should we need to add new settings, a new page type with the additional settings structure will be defined.
+
+At the moment there are no defined settings, so the structure of the settings is not defined either.
+
+## Derived keys cache
+
+__Magic number__: 0x4b 0x43 0x01 0xXX
+
+The cache of derived keys is used to store all keys which have been derived using the algorithms defined in the BIP32 specification. The structure of each entry is composed by a 40-bytes path (as defined in the PIN-less list chapter) followed by a key with the same structure as the master wallet key.
+
+New cache entries can be only appended. When the cache is full, the oldest page will simply be erased and appending will continue from there. The write counter of the header is used in a different manner from other pages, it is a sequence indicating the page order. When the cache is full, the page with the lowest counter will be erased. The fresh page will have a counter which is 1 higher than the previous last page. This allows erasing the cache in a cyclic manner, balancing the load on all pages. The cache does not use page rewriting, so the swap pages are not used.
+
+Each entry is 136 bytes long, meaning we can fit 15 keys in a single page. We have allocated 30 pages meaning 450 keys at once. This should be enough to never fill the cache by normal usage. We have a lot of unallocated pages however, so we might allocate even more pages if needed.
+
+When searching the cache, the code should keep track of the longest match found. This allows, even in case of a cache miss, to at least start key derivation from an intermediate step. When deriving a key, all intermediates should be written to the cache (without duplicates).

@@ -94,7 +94,7 @@ The master wallet is generated from the seed and its address is sent to the clie
 
 This command is used to sign a transaction. It requires PIN authorization, unless PIN has been disabled for the given key path. The response contains the RLP-encoded V, R and S (not the entire transaction for bandwidth saving reasons).
 
-The key path is absolute and is used to derive keys according to the algorithms defined in BIP32. The implementation should keep a cache to avoid recalculating the keys every time. The maximum key path depth is 10.
+The key path is absolute and is used to derive keys according to the algorithms defined in BIP32. The implementation should keep a cache to avoid recalculating the keys every time. The maximum key path depth is 9.
 
 The signature follows EIP-155 and the transaction is expected to contain the chain id (on 1 byte only for now) in place of V and empty R, S. 
 
@@ -104,7 +104,7 @@ The signature follows EIP-155 and the transaction is expected to contain the cha
 
 ### Get Address
 
-This command is issued to get the address of a wallet with the given key path. The maximum key path depth is 10.
+This command is issued to get the address of a wallet with the given key path. The maximum key path depth is 9.
 
 * Parameters: RLP encoded key path as list of numbers
 * Response: The address of the wallet
@@ -112,7 +112,7 @@ This command is issued to get the address of a wallet with the given key path. T
 
 ### Disable PIN
 
-Disables PIN entry for the given key path. The maximum key path depth is 10. The maximum amount key paths for which PIN entry can be disabled at the same time is 10. When the PIN entry is disabled a simple yes/no confirmation will be required instead.
+Disables PIN entry for the given key path. The maximum key path depth is 9. When the PIN entry is disabled a simple yes/no confirmation will be required instead.
 
 * Parameters: RLP encoded key path as list of numbers
 * Response: Only status code
@@ -120,7 +120,7 @@ Disables PIN entry for the given key path. The maximum key path depth is 10. The
 
 ### Enable PIN
 
-Enables PIN entry for the given key path. The maximum key path depth is 10. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds.
+Enables PIN entry for the given key path. The maximum key path depth is 9. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds.
 
 * Parameters: RLP encoded key path as list of numbers
 * Response: Only status code
