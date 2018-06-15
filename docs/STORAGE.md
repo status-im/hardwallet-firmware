@@ -45,7 +45,7 @@ The first 8 bytes (a double word) are used for the page header. The header has t
      
     b   63 - 48      47 - 40       39 - 32       31 - 0
     |======================================================| 
-    |    TYPE   |    VERSION    |   INDEX   |  WRITE COUNT |
+    |    INDEX    |   VERSION    |   TYPE   |  WRITE COUNT |
     |======================================================| 
     
 Basically the first word is a magic number, which encodes a page type (2 bytes), a version of the page type, needed if format changes (1 byte), the index of the page, needed if this kind of page is present on several pages (1 bytes). The other 32-bit word is the write count of this page, written as a little-endian integer.
@@ -87,7 +87,7 @@ On the current hardware, 130 pages are allocated for the user data area. The cur
     |                                   |
     |-----------------------------------|
     |                                   |
-    |            Settings               | Page 7-10
+    |            Settings               | Page 7-9
     |                                   |
     |-----------------------------------|
     |                                   |
@@ -122,12 +122,12 @@ The master key needs to be stored in a secure area. The protection offered by th
 
 ## Write-once data area
 
-__Magic number__: 0x57 0x4F 0x01 0x00
+__Magic number__: 0x574F0100
 
 The area reserved for write-once data contains data structures of fixed length at predetermined offsets. This data is generated and written during device initialization and is never updated. The first 8 bytes contain a header like all other pages.
 
     |===================================| 
-    |    Magic (0x57 0x4F 0x01 0x00)    | byte 0-3
+    |         Magic (0x574F0100)        | byte 0-3
     |-----------------------------------|
     |            Write counter          | byte 4-7
     |-----------------------------------|
@@ -151,7 +151,7 @@ The public key is stored in its compressed form. The IV used for encryption is c
 
 ## PIN data area
 
-__Magic number__: 0x50 0x4e 0x01 0x00
+__Magic number__: 0x504e0100
 
 The PIN data area is used to verify the PIN. The PIN could be stored plain, since if an attacker manages to read out the memory the PIN does not offer any protection. However, since the user might be using the same PIN for other applications, we do not want it to be recoverable. Hashing would be possible, but brute-forcing the hash would be extremely easy due to the small amount of possible PINs and does not even require pre-built tables, so a salt would not help.
 
@@ -170,13 +170,13 @@ When veryfing the PIN, the software must scan the area until it reaches an empty
 
 ## Counter area
 
-__Magic number__: 0x43 0x54 0x01 0x0X
+__Magic number__: 0x4354010X
 
 This area provides a place to keep counters. An entry is 8 bytes long and the size of each individual counter can vary from 4 to 64 bits (in 4-bits increments). At the moment, only the PIN retry counter in the lowest 4 bits of the entry is stored (giving a maximum theoretical retry count of 15, but pratically we want to keep it between 3 and 10). Reading and updating the counter entry works exactly as with the PIN entry. Each page can fit exactly 255 updates, but in this case 2 pages are allocated. When rewriting, the current counters value must be the first entry of the first page, while the rest must remain in the erased state.
 
 ## PIN-less list
 
-__Magic number__: 0x4e 0x50 0x01 0x0X
+__Magic number__: 0x4e50010X
 
 This is a list of wallet paths which do not require a PIN when signing. Each entry is exactly 40 bytes long, allowing 9 levels of nesting in the hierarchy below the master wallet. The length does not change even if less than 9 levels are used. The structure is as follows
 
@@ -193,7 +193,7 @@ When the list is full, an attempt must be made to compact the list (i.e: generat
 
 ## Settings
 
-__Magic number__: 0x53 0x31 0x01 0x0X
+__Magic number__: 0x5331010X
 
 Settings work the same as with the counters area. Each entry (size tbd, must be a multiple of 8 bytes) contains a copy of all settings. Should we need to add new settings, a new page type with the additional settings structure will be defined.
 
@@ -201,7 +201,7 @@ At the moment there are no defined settings, so the structure of the settings is
 
 ## Derived keys cache
 
-__Magic number__: 0x4b 0x43 0x01 0xXX
+__Magic number__: 0x4b4301XX
 
 The cache of derived keys is used to store all keys which have been derived using the algorithms defined in the BIP32 specification. The structure of each entry is composed by a 40-bytes path (as defined in the PIN-less list chapter) followed by a key with the same structure as the master wallet key.
 
