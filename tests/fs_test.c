@@ -37,6 +37,9 @@ int flash_copy(uint32_t* src, __IO uint32_t* dst, uint32_t size) {
   TEST_CHECK(!(flash_locked || (((uintptr_t) dst) % 4) || (size % 2)));
 
   for(int i = 0; i < size; i += 2) {
+    TEST_CHECK(dst[i] == 0xffffffff || src[i] == 0x00000000);
+    TEST_CHECK(dst[i + 1] == 0xffffffff || src[i + 1] == 0x00000000);
+
     dst[i] = src[i];
     dst[i + 1] = src[i + 1];
   }
