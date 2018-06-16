@@ -92,7 +92,33 @@ void test_fs_init(void) {
   }
 }
 
+void test_fs_commit(void) {
+  TEST_CHECK(0);
+}
+
+void test_fs_find_free_entry(void) {
+  TEST_CHECK(0);
+}
+
+void test_fs_find_last_entry(void) {
+  TEST_CHECK(0);
+}
+
+void test_fs_swap_get_free(void) {
+  TEST_CHECK(0);
+}
+
+void test_fs_cache_get_free(void) {
+  TEST_CHECK(0);
+}
+
 TEST_LIST = {
    { "fs_init", test_fs_init },
+   { "fs_commit", test_fs_commit },
+   { "fs_find_free_entry", test_fs_find_free_entry },
+   { "fs_find_last_entry", test_fs_find_last_entry },
+   { "fs_swap_get_free", test_fs_swap_get_free },
+   { "fs_cache_get_free", test_fs_cache_get_free },
+
    { 0 }
 };
