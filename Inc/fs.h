@@ -29,8 +29,8 @@
 #include <stdint.h>
 
 #define FS_START (UPGRADE_FW_START + FIRMWARE_SIZE)
-#define FS_FIRST_PAGE ((FS_START - FLASH_START_BANK2) / FLASH_PAGE_SIZE)
-#define FS_PAGE_COUNT (FLASH_BANK_SIZE / FLASH_PAGE_SIZE) - FS_FIRST_PAGE
+#define FS_FIRST_PAGE (UPGRADE_FW_FIRST_PAGE + FIRMWARE_PAGE_COUNT)
+#define FS_PAGE_COUNT ((FLASH_BANK_SIZE / FLASH_PAGE_SIZE) - FS_FIRST_PAGE)
 
 #define FS_WRITE_ONCE_ID 0x574f0000
 #define FS_WRITE_ONCE_PAGE 0
@@ -62,7 +62,7 @@
 #define FS_PAGE_ID(p, v, i) (p | (v << 8) | i)
 #define FS_V1_PAGE_ID(p, i) FS_PAGE_ID(p, 1, i)
 
-#define FS_PAGE_IDX_ADDR(p, i) ((uint32_t *)(FS_START + ((p + i) * FLASH_PAGE_SIZE)))
+#define FS_PAGE_IDX_ADDR(p, i) ((uint32_t*)(FS_START + ((p + i) * FLASH_PAGE_SIZE)))
 #define FS_ABS_IDX_PAGE(p, i) (FS_FIRST_PAGE + p + i)
 
 #define FS_PAGE_ADDR(p) FS_PAGE_IDX_ADDR(p, 0)
@@ -71,8 +71,8 @@
 int fs_init();
 int fs_commit();
 
-uint32_t* fs_find_free_entry(uint32_t page_id, int page_count, int entry_size);
-uint32_t* fs_find_last_entry(uint32_t page_id, int page_count, int entry_size);
+uint32_t* fs_find_free_entry(uint32_t page, int page_count, int entry_size);
+uint32_t* fs_find_last_entry(uint32_t page, int page_count, int entry_size);
 uint32_t* fs_swap_get_free();
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size);
 

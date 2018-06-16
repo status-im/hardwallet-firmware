@@ -92,7 +92,7 @@ On the current hardware, 130 pages are allocated for the user data area. The cur
     |-----------------------------------|
     |                                   |
     |                                   |
-    |        Derived keys cache         | Page 10-29
+    |        Derived keys cache         | Page 10-39
     |                                   |
     |-----------------------------------| 
     |                                   |

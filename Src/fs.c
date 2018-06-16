@@ -189,11 +189,11 @@ uint32_t* fs_find_free_entry(uint32_t page_id, int page_count, int entry_size) {
   return NULL;
 }
 
-uint32_t* fs_find_last_entry(uint32_t page_id, int page_count, int entry_size) {
-  uint32_t* free_addr = fs_find_free_entry(page_id, page_count, entry_size);
+uint32_t* fs_find_last_entry(uint32_t page, int page_count, int entry_size) {
+  uint32_t* free_addr = fs_find_free_entry(page, page_count, entry_size);
 
   if (!free_addr) {
-    free_addr = FS_PAGE_ADDR(page_id) + (page_count * FLASH_PAGE_SIZE);
+    free_addr = FS_PAGE_ADDR(page) + (page_count * (FLASH_PAGE_SIZE/4));
   }
 
   return free_addr - entry_size;

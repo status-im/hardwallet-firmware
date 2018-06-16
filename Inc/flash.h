@@ -25,7 +25,9 @@
 #ifndef FLASH_H_
 #define FLASH_H_
 
+#if defined(__arm__)
 #include "stm32l4xx.h"
+#endif
 
 // The values below come from the ST DM00083560 document. They might need to be changed if the MCU is swapped for a different part
 #define FLASH_KEYR1 0x45670123
@@ -37,6 +39,7 @@
 #define FLASH_START_BANK2 (FLASH_BASE + FLASH_BANK_SIZE)
 
 #define FIRMWARE_SIZE ((FLASH_BANK_SIZE - 0x2000) / 2)
+#define FIRMWARE_PAGE_COUNT (FIRMWARE_SIZE / FLASH_PAGE_SIZE)
 
 #define UPGRADE_FW_START FLASH_START_BANK2
 #define UPGRADE_FW_FIRST_PAGE 0
