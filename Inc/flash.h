@@ -31,8 +31,6 @@
 #define FLASH_KEYR1 0x45670123
 #define FLASH_KEYR2 0xCDEF89AB
 
-#define FLASH_BANK2 1
-
 #define FLASH_BANK_SIZE 0x80000
 #define FLASH_PAGE_SIZE 0x800
 
@@ -54,7 +52,7 @@ int flash_unlock();
 int flash_erase(uint8_t page, uint8_t page_count);
 
 /**
- * Copies `size` bytes from `src` to `dst`. Since this function is only called using constant values and previously checked values, the input parameters are not validated. The addresses must be aligned according
+ * Copies `size` words from `src` to `dst`. Since this function is only called using constant values and previously checked values, the input parameters are not validated. The addresses must be aligned according
  * to the rules specified in the ST DM00083560 document.
  */
 int flash_copy(uint32_t* src, __IO uint32_t* dst, uint32_t size);

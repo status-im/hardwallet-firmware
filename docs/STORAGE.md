@@ -48,7 +48,7 @@ The first 8 bytes (a double word) are used for the page header. The header has t
     |    INDEX    |   VERSION    |   TYPE   |  WRITE COUNT |
     |======================================================| 
     
-Basically the first word is a magic number, which encodes a page type (2 bytes), a version of the page type, needed if format changes (1 byte), the index of the page, needed if this kind of page is present on several pages (1 bytes). The other 32-bit word is the write count of this page, written as a little-endian integer.
+Basically the first word is a magic number, which encodes a page type (2 bytes), a version of the page type, needed if format changes (1 byte), the index of the page, needed if this kind of page is present on several pages (1 bytes). The other 32-bit word is the write count of this page, written as a little-endian signed integer (but negative count is not allowed).
 
 When reading a page the header is verified for correctness. This is useful for detecting partial rewrites (more details will follow).
 
