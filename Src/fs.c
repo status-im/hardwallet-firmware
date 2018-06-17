@@ -131,9 +131,13 @@ static uint32_t _fs_actual_size(uint32_t *page) {
 
 static int _fs_commit_page(uint32_t* page, int target_p) {
   uint32_t *target = FS_PAGE_ADDR(target_p);
-  if (flash_erase(FS_ABS_PAGE(target_p), 1)) return -1;
-  if (flash_copy(&page[2], &target[2], _fs_actual_size(page))) return -1;
-  if (flash_copy(page, target, 2)) return -1;
+
+  if (page[1] > target[1]) {
+    if (flash_erase(FS_ABS_PAGE(target_p), 1)) return -1;
+    if (flash_copy(&page[2], &target[2], _fs_actual_size(page))) return -1;
+    if (flash_copy(page, target, 2)) return -1;
+  }
+
   uint32_t header[2] = {0, 0};
   if (flash_copy(header, page, 2)) return -1;
 
