@@ -56,7 +56,7 @@
 #define FS_KEY_CACHE_PAGE 10
 #define FS_KEY_CACHE_COUNT 30
 
-#define FS_SWAP_PAGE (FS_PAGE_COUNT - 9)
+#define FS_SWAP_PAGE (FS_PAGE_COUNT - 8)
 #define FS_SWAP_COUNT 8
 
 #define FS_PAGE_ID(p, v, i) (p | (v << 8) | i)

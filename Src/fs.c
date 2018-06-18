@@ -79,8 +79,12 @@ ret:
 }
 
 static int _fs_page_by_magic(uint32_t magic) {
-  uint32_t idx = magic & 0xff;
-  magic = magic & 0xffff0000;
+  uint32_t idx = 0;
+
+  if (!(magic == FS_ZEROED_ENTRY || magic == FS_CLEAR_ENTRY)) {
+    idx = magic & 0xff;
+    magic = magic & 0xffff0000;
+  }
 
   int page = FS_UNKNOWN;
 
@@ -111,9 +115,7 @@ static int _fs_page_by_magic(uint32_t magic) {
     break;
   }
 
-  if (page >= 0) {
-    page += idx;
-  }
+  page += idx;
 
   return page;
 }
@@ -157,14 +159,15 @@ int fs_commit() {
     switch(target_p) {
     case FS_FREE:
       if (erase_next_free) {
-        if(flash_erase(FS_ABS_IDX_PAGE(FS_SWAP_PAGE, i), 1)) goto ret;
+        if (flash_erase(FS_ABS_IDX_PAGE(FS_SWAP_PAGE, i), 1)) goto ret;
         erase_next_free = 0;
       }
       break;
     case FS_ERASED:
+      erase_next_free = 0;
       break;
     case FS_UNKNOWN:
-      if(flash_erase(FS_ABS_IDX_PAGE(FS_SWAP_PAGE, i), 1)) goto ret;
+      if (flash_erase(FS_ABS_IDX_PAGE(FS_SWAP_PAGE, i), 1)) goto ret;
       break;
     default:
       if (_fs_commit_page(page, target_p)) goto ret;
