@@ -71,8 +71,8 @@
 int fs_init();
 int fs_commit();
 
-uint32_t* fs_find_free_entry(uint32_t page, int page_count, int entry_size);
-uint32_t* fs_find_last_entry(uint32_t page, int page_count, int entry_size);
+uint32_t* fs_find_free_entry(uint32_t page_num, int page_count, int entry_size);
+uint32_t* fs_find_last_entry(uint32_t page_num, int page_count, int entry_size);
 uint32_t* fs_swap_get_free();
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size);
 

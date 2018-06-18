@@ -183,11 +183,8 @@ ret:
   return res;
 }
 
-uint32_t* fs_find_free_entry(uint32_t page_id, int page_count, int entry_size) {
-  uint32_t* page = FS_PAGE_ADDR(page_id);
-  int size = page_count * (FLASH_PAGE_SIZE/4);
-
-  for (int i = 2; i < size; i += (entry_size/4)) {
+uint32_t* _fs_find_free_entry(uint32_t* page, int entry_size) {
+  for (int i = 2; i < (FLASH_PAGE_SIZE/4); i += entry_size) {
     if (page[i] == FS_CLEAR_ENTRY) {
       return &page[i];
     }
@@ -196,11 +193,31 @@ uint32_t* fs_find_free_entry(uint32_t page_id, int page_count, int entry_size) {
   return NULL;
 }
 
-uint32_t* fs_find_last_entry(uint32_t page, int page_count, int entry_size) {
-  uint32_t* free_addr = fs_find_free_entry(page, page_count, entry_size);
+uint32_t* fs_find_free_entry(uint32_t page_num, int page_count, int entry_size) {
+  for (int i = 0; i < page_count; i++) {
+    uint32_t* page = _fs_find_free_entry(FS_PAGE_IDX_ADDR(page_num, i), entry_size);
+
+    if (page) {
+      return page;
+    }
+  }
+
+  return NULL;
+}
+
+uint32_t* fs_find_last_entry(uint32_t page_num, int page_count, int entry_size) {
+  uint32_t* page = FS_PAGE_ADDR(page_num);
+
+  if (page[2] == FS_CLEAR_ENTRY) {
+    return NULL;
+  }
+
+  uint32_t* free_addr = fs_find_free_entry(page_num, page_count, entry_size);
 
   if (!free_addr) {
-    free_addr = FS_PAGE_ADDR(page) + (page_count * (FLASH_PAGE_SIZE/4));
+    free_addr = &page[(page_count * (FLASH_PAGE_SIZE/4))];
+  } else if (!((((intptr_t) free_addr - (intptr_t) page) - 8) % FLASH_PAGE_SIZE)) {
+    free_addr -= 2;
   }
 
   return free_addr - entry_size;
@@ -237,9 +254,9 @@ uint32_t* fs_swap_get_free() {
 uint32_t * _fs_cache_free_oldest(uint32_t cache_start, int page_count) {
   uint32_t* addr = NULL;
 
-  int lowwc = -1;
-  int highwc = 0x7fffffff;
-  int page_idx = -1;
+  uint32_t lowwc = 0xffffffff;
+  uint32_t highwc = 0;
+  uint32_t page_idx = 0;
 
   for (int i = 0; i < page_count; i++) {
     uint32_t *page = FS_PAGE_IDX_ADDR(cache_start, i);
@@ -248,7 +265,7 @@ uint32_t * _fs_cache_free_oldest(uint32_t cache_start, int page_count) {
     } else if (page[1] < lowwc) {
       lowwc = page[1];
       addr = page;
-      page_idx = 1;
+      page_idx = i;
     }
   }
 
@@ -264,7 +281,7 @@ uint32_t * _fs_cache_free_oldest(uint32_t cache_start, int page_count) {
 
 ret:
   flash_lock();
-  return addr;
+  return &addr[2];
 }
 
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size) {

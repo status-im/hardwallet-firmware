@@ -147,13 +147,62 @@ void test_fs_commit(void) {
 void test_fs_find_free_entry(void) {
   TEST_CHECK(!fs_init());
 
-  TEST_CHECK(0);
+  uint32_t* page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 0);
+  TEST_CHECK(fs_find_free_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[2]);
+  page[2] = 0;
+
+  TEST_CHECK(fs_find_free_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[12]);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 1);
+  TEST_CHECK(fs_find_free_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[2]);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 2);
+
+  for (int i = 2; i < ((FLASH_PAGE_SIZE/4) - 2); i++) {
+    page[i] = 0;
+  }
+
+  TEST_CHECK(fs_find_free_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 2) == &page[510]);
+  TEST_CHECK(fs_find_free_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == NULL);
 }
 
 void test_fs_find_last_entry(void) {
   TEST_CHECK(!fs_init());
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == NULL);
 
-  TEST_CHECK(0);
+  uint32_t* page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 0);
+  page[2] = 0;
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[2]);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[502]);
+  page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 1);
+  page[2] = 0;
+  page[12] = 0;
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[12]);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 2);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[502]);
 }
 
 void test_fs_swap_get_free(void) {
@@ -177,8 +226,28 @@ void test_fs_swap_get_free(void) {
 
 void test_fs_cache_get_free(void) {
   TEST_CHECK(!fs_init());
+  uint32_t* page;
 
-  TEST_CHECK(0);
+  for(int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
+    page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, i);
+    for (int j = 2; j < FLASH_PAGE_SIZE/4; j++) {
+      page[j] = 0;
+    }
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 0);
+  TEST_CHECK(fs_cache_get_free(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 34) == &page[2]);
+  TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_KEY_CACHE_ID, 0));
+  TEST_CHECK(page[1] == FS_KEY_CACHE_COUNT);
+
+  for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
+    page[i] = 0;
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 1);
+  TEST_CHECK(fs_cache_get_free(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 34) == &page[2]);
+  TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_KEY_CACHE_ID, 1));
+  TEST_CHECK(page[1] == (FS_KEY_CACHE_COUNT + 1));
 }
 
 TEST_LIST = {
