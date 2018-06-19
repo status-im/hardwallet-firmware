@@ -68,12 +68,41 @@
 #define FS_PAGE_ADDR(p) FS_PAGE_IDX_ADDR(p, 0)
 #define FS_ABS_PAGE(p) FS_ABS_IDX_PAGE(p, 0)
 
+/**
+ * Erases and initialize the filesystem. Return 0 on success.
+ */
 int fs_init();
+
+/**
+ * Commits the changes from the swap pages to the filesystem
+ */
 int fs_commit();
 
+/**
+ * Scans the requested number of consecutive pages, starting at the given page number until empty space for a new entry is found.
+ * The address of the empty entry is returned. If all pages are full, NULL is returned.
+ *
+ * The entry size is in words, so if you have the byte length you must divide it by 4, since we target 32-bit architectures.
+ */
 uint32_t* fs_find_free_entry(uint32_t page_num, int page_count, int entry_size);
+
+/**
+ * Similar to fs_find_free_entry, but returns the last non-empty entry instead of the first empty one. If there are no entries NULL is returned.
+ * This function is needed to get the current value of updateable entries from the filesystem, like counters, settings, etc.
+ */
 uint32_t* fs_find_last_entry(uint32_t page_num, int page_count, int entry_size);
+
+/**
+ * Gets the first erased swap page. If none is erased, it erases a free page and returns its address. Returns NULL if all pages contain data.
+ */
 uint32_t* fs_swap_get_free();
+
+/**
+ * Similar to fs_find_free_entry, but if there is no space available it erases the oldest page and return its address.
+ * The magic number and write counter of the erased page is automatically initialized.
+ *
+ * This function only returns NULL if there is an internal error, like being unable to erase the page.
+ */
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size);
 
 #endif /* FS_H_ */

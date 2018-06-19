@@ -57,7 +57,7 @@ void pbkdf2_sha512(const uint8_t *pw, int pwlen, const uint8_t *salt, int saltle
   cf_pbkdf2_hmac(pw, pwlen, salt, saltlen, iterations, out, outlen, &cf_sha512);
 }
 
-int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t *recid, uint8_t signature[ECDSA_256_SIG_LEN]) {
+int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t* recid, uint8_t signature[ECDSA_256_SIG_LEN]) {
   uECC_set_rng(&rng);
   uECC_Curve curve = uECC_secp256k1();
 
@@ -70,7 +70,7 @@ int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t *r
   return 0;
 }
 
-int _rng(uint32_t *out) {
+int _rng(uint32_t* out) {
   do {
     if (RNG->SR & (RNG_SR_SECS|RNG_SR_CECS)) {
       RNG->SR = 0;
@@ -82,7 +82,7 @@ int _rng(uint32_t *out) {
   } while(1);
 }
 
-int rng(uint8_t *dst, unsigned int size) {
+int rng(uint8_t* dst, unsigned int size) {
   SET_BIT(RNG->CR, RNG_CR_RNGEN);
 
   int word_count = size / 4;
