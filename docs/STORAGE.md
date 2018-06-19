@@ -131,9 +131,9 @@ The area reserved for write-once data contains data structures of fixed length a
     |-----------------------------------|
     |            Write counter          | byte 4-7
     |-----------------------------------|
-    |     Master Wallet Public Key      | byte 8-40
+    |             Random data           | byte 8-18
     |-----------------------------------|
-    |             Random data           | byte 41-51
+    |     Master Wallet Public Key      | byte 19-51
     |-----------------------------------|
     |Master Wallet Priv Key (encrypted) | byte 52-83
     |-----------------------------------|
@@ -146,8 +146,7 @@ The area reserved for write-once data contains data structures of fixed length a
     | Master encryption key (TEMPORARY!)| byte 2032-2047
     |===================================|
 
-The public key is stored in its compressed form. The IV used for encryption is composed of the last 5 bytes of the public key concatenated to the 11 random bytes following it.
-
+The public key is stored in its compressed form. The IV used for encryption is composed of 11 random bytes followed by the first 5 bytes of the public key.
 
 ## PIN data area
 

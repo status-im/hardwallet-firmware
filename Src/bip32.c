@@ -36,7 +36,7 @@ int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_
     tmp[0] = 0;
     memcpy(&tmp[1], priv_key->key, KEY_COMPONENT_LEN);
   } else {
-    tmp[0] = 2 + (pub_key->y[KEY_COMPONENT_LEN - 1] & 1);
+    tmp[0] = pub_key->y;
     memcpy(&tmp[1], pub_key->x, KEY_COMPONENT_LEN);
   }
 
@@ -71,7 +71,7 @@ int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_
     // a bit hacky, but priv_num and out_num are sequential in memory so this works
     bignum256_secp256k1_publickey(res_num, priv_num);
     bignum256_to_bytes(priv_num, out_pub->x);
-    bignum256_to_bytes(out_num, out_pub->y);
+    out_pub->y = 2 + bignum256_read_bit(out_num, 0);
   }
 
   return 0;

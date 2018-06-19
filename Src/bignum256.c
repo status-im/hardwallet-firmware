@@ -45,6 +45,10 @@ int bignum256_is_zero(const bignum256_t* n) {
   return uECC_vli_isZero(n->_v, BIGNUM_WORDS);
 }
 
+int bignum256_read_bit(const bignum256_t* n, int bit) {
+  return uECC_vli_testBit(n, bit);
+}
+
 int bignum256_cmp(const bignum256_t* a, const bignum256_t* b) {
   return uECC_vli_cmp(a->_v, b->_v, BIGNUM_WORDS);
 }

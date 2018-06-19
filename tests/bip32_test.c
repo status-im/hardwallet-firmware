@@ -14,8 +14,9 @@ const bip32_priv_key_t priv = {
 };
 
 const bip32_pub_key_t pub = {
+  {0, 0, 0},
+  3,
   { 0x21, 0x20, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xc0, 0xcd, 0xce, 0xcf, 0xef, 0xfa },
-  { 0xd1, 0xd2, 0xd3, 0xd4, 0xd5, 0xd6, 0xd7, 0xd8, 0xd9, 0xda, 0xdb, 0xdc, 0xd0, 0xde, 0xdf, 0x41, 0x42, 0x43, 0x40, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x5a, 0x5b }
 };
 
 const uint32_t curve_n[32/4]; // empty, just need to compare address;
@@ -71,6 +72,10 @@ void bignum256_secp256k1_publickey(const bignum256_t* priv_key, bignum256_t* out
   bignum256_from_bytes(pub.x, (bignum256_t *)(((uint8_t *) out_pub) + 32));
 }
 
+int bignum256_read_bit(const bignum256_t* n, int bit) {
+  return 1;
+}
+
 void hmac_sha512(const uint8_t* key, int keylen, const uint8_t* data, int len, uint8_t hash[SHA_512_LEN]) {
   hmac_sha512_called = 1;
   TEST_CHECK(keylen == 32);
@@ -88,7 +93,7 @@ void hmac_sha512(const uint8_t* key, int keylen, const uint8_t* data, int len, u
   }
 
   memcpy(hash, priv.chain, 32);
-  memcpy(&hash[32], pub.y, 32);
+  memcpy(&hash[32], pub.x, 32);
 }
 
 static void reset_calls() {
@@ -112,16 +117,16 @@ void test_bip32_ckd_private(void) {
   bip32_ckd_private(0x01020304, &priv, &pub, &out_priv, &out_pub);
   check_calls(1);
   TEST_CHECK(!memcmp(out_priv.key, pub.x, 32));
-  TEST_CHECK(!memcmp(out_priv.chain, pub.y, 32));
+  TEST_CHECK(!memcmp(out_priv.chain, pub.x, 32));
   TEST_CHECK(!memcmp(out_pub.x, priv.key, 32));
-  TEST_CHECK(!memcmp(out_pub.y, pub.x, 32));
+  TEST_CHECK(out_pub.y == 3);
 
   reset_calls();
 
   bip32_ckd_private(0x84050607, &priv, &pub, &out_priv, NULL);
   check_calls(0);
   TEST_CHECK(!memcmp(out_priv.key, pub.x, 32));
-  TEST_CHECK(!memcmp(out_priv.chain, pub.y, 32));
+  TEST_CHECK(!memcmp(out_priv.chain, pub.x, 32));
 }
 
 TEST_LIST = {

@@ -38,6 +38,7 @@ void bignum256_to_bytes(const bignum256_t* bignum, uint8_t* bytes);
 void bignum256_mod_add(const bignum256_t* a, const bignum256_t* b, const bignum256_t* mod, bignum256_t* c);
 int bignum256_is_zero(const bignum256_t* n);
 int bignum256_cmp(const bignum256_t* a, const bignum256_t* b);
+int bignum256_read_bit(const bignum256_t* n, int bit);
 
 bignum256_t* bignum256_secp256k1_n();
 void bignum256_secp256k1_publickey(const bignum256_t* priv_key, bignum256_t* out_pub);
