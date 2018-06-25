@@ -3,6 +3,8 @@
 
 #include "../Src/bip32.c"
 
+static int generating_master_key;
+
 static int hmac_sha512_called = 0;
 static int bignum256_cmp_called = 0;
 static int bignum256_is_zero_called = 0;
@@ -14,10 +16,12 @@ const bip32_priv_key_t priv = {
 };
 
 const bip32_pub_key_t pub = {
-  {0, 0, 0},
+  { 0, 0, 0 },
   3,
   { 0x21, 0x20, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xc0, 0xcd, 0xce, 0xcf, 0xef, 0xfa },
 };
+
+const uint8_t bip39_test_seed[] = { 0x75, 0x89, 0xac, 0x64, 0xc5, 0x08, 0x8d, 0x86, 0x67, 0xeb, 0xe6, 0xda, 0x96, 0xd9, 0x55, 0xe7, 0x7a, 0x8c, 0x5e, 0x0c, 0xc8, 0x87, 0x4a, 0xc0, 0x1b, 0x58, 0x0e, 0xc5, 0x5e, 0x9c, 0x32, 0xb6, 0x27, 0x6d, 0x29, 0xbc, 0x79, 0x38, 0x16, 0xea, 0x16, 0x6e, 0x4f, 0x5b, 0xf7, 0xf4, 0xec, 0x41, 0x28, 0x5e, 0x80, 0x51, 0xfc, 0x08, 0x28, 0xc9, 0x7b, 0xcd, 0xb2, 0x15, 0x94, 0x7e, 0x75, 0xec };
 
 const uint32_t curve_n[32/4]; // empty, just need to compare address;
 
@@ -78,21 +82,31 @@ int bignum256_read_bit(const bignum256_t* n, int bit) {
 
 void hmac_sha512(const uint8_t* key, int keylen, const uint8_t* data, int len, uint8_t hash[SHA_512_LEN]) {
   hmac_sha512_called = 1;
-  TEST_CHECK(keylen == 32);
-  TEST_CHECK(len == 37);
-  TEST_CHECK(!memcmp(key, priv.chain, keylen));
 
-  if (data[33] == 0x84) {
-    TEST_CHECK(data[0] == 0x00);
-    TEST_CHECK(!memcmp(&data[1], priv.key, 32));
-    TEST_CHECK(!memcmp(&data[34], "\5\6\7", 3));
+  if (generating_master_key) {
+    TEST_CHECK(keylen == 12);
+    TEST_CHECK(len == 64);
+    TEST_CHECK(!memcmp(key, "Bitcoin Seed", keylen));
+    TEST_CHECK(!memcmp(data, bip39_test_seed, len));
+    memcpy(hash, pub.x, 32);
   } else {
-    TEST_CHECK(data[0] == 0x03);
-    TEST_CHECK(!memcmp(&data[1], pub.x, 32));
-    TEST_CHECK(!memcmp(&data[33], "\1\2\3\4", 4));
+    TEST_CHECK(keylen == 32);
+    TEST_CHECK(len == 37);
+    TEST_CHECK(!memcmp(key, priv.chain, keylen));
+
+    if (data[33] == 0x84) {
+      TEST_CHECK(data[0] == 0x00);
+      TEST_CHECK(!memcmp(&data[1], priv.key, 32));
+      TEST_CHECK(!memcmp(&data[34], "\5\6\7", 3));
+    } else {
+      TEST_CHECK(data[0] == 0x03);
+      TEST_CHECK(!memcmp(&data[1], pub.x, 32));
+      TEST_CHECK(!memcmp(&data[33], "\1\2\3\4", 4));
+    }
+
+    memcpy(hash, priv.chain, 32);
   }
 
-  memcpy(hash, priv.chain, 32);
   memcpy(&hash[32], pub.x, 32);
 }
 
@@ -113,23 +127,43 @@ static void check_calls(int pub) {
 void test_bip32_ckd_private(void) {
   bip32_priv_key_t out_priv;
   bip32_pub_key_t out_pub;
+  generating_master_key = 0;
 
+  reset_calls();
   bip32_ckd_private(0x01020304, &priv, &pub, &out_priv, &out_pub);
   check_calls(1);
+
   TEST_CHECK(!memcmp(out_priv.key, pub.x, 32));
   TEST_CHECK(!memcmp(out_priv.chain, pub.x, 32));
   TEST_CHECK(!memcmp(out_pub.x, priv.key, 32));
   TEST_CHECK(out_pub.y == 3);
 
   reset_calls();
-
   bip32_ckd_private(0x84050607, &priv, &pub, &out_priv, NULL);
   check_calls(0);
+
   TEST_CHECK(!memcmp(out_priv.key, pub.x, 32));
   TEST_CHECK(!memcmp(out_priv.chain, pub.x, 32));
 }
 
+void test_bip32_master_key(void) {
+  bip32_priv_key_t out_priv;
+  bip32_pub_key_t out_pub;
+  generating_master_key = 1;
+
+  reset_calls();
+  bip32_master_key(bip39_test_seed, 64, &out_priv, &out_pub);
+  TEST_CHECK(hmac_sha512_called);
+  TEST_CHECK(bignum256_pubkey_called);
+
+  TEST_CHECK(!memcmp(out_priv.key, pub.x, 32));
+  TEST_CHECK(!memcmp(out_priv.chain, pub.x, 32));
+  TEST_CHECK(!memcmp(out_pub.x, priv.key, 32));
+  TEST_CHECK(out_pub.y == 3);
+}
+
 TEST_LIST = {
     { "bip32_ckd_private", test_bip32_ckd_private },
+    { "bip32_master_key", test_bip32_master_key },
     { 0 }
 };

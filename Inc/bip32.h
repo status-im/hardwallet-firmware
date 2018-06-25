@@ -46,4 +46,9 @@ typedef struct {
  */
 int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub);
 
+/**
+ * Generates the private and public keys from the given binary seed.
+ */
+void bip32_master_key(const uint8_t* seed, int seed_len, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub);
+
 #endif /* BIP32_H_ */

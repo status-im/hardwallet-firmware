@@ -77,3 +77,17 @@ int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_
   return 0;
 }
 
+void bip32_master_key(const uint8_t* seed, int seed_len, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub) {
+  uint32_t _tmp[(KEY_COMPONENT_LEN * 3) / 4]; // declare for word access
+  uint8_t *tmp = (uint8_t *) _tmp;
+  bignum256_t *priv_num = (bignum256_t *) tmp;
+  bignum256_t *pub_x = (bignum256_t *) &tmp[KEY_COMPONENT_LEN];
+  bignum256_t *pub_y = (bignum256_t *) &tmp[KEY_COMPONENT_LEN * 2];
+
+  hmac_sha512((uint8_t*)"Bitcoin Seed", 12, seed, seed_len, out_priv->key);
+  bignum256_from_bytes(out_priv->key, priv_num);
+  bignum256_secp256k1_publickey(priv_num, pub_x);
+  bignum256_to_bytes(pub_x, out_pub->x);
+  out_pub->y = 2 + bignum256_read_bit(pub_y, 0);
+}
+
