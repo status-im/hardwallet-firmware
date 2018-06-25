@@ -31,6 +31,8 @@
 #define SHA_256_LEN 32
 #define SHA_512_LEN 64
 #define ECDSA_256_SIG_LEN 64
+#define AES_BLOCK_SIZE 16
+#define AES_128_KEYLEN 16
 
 // Use the function defined here for cryptography. This is a wrapper around external dependencies and/or device specific code
 // All lengths here are in bytes.
@@ -67,5 +69,15 @@ int ecdsa(const uint8_t* privkey, const uint8_t hash[KEKKAC_256_LEN], uint8_t* r
  * The implementation of this function must use a secure random source. On STM32 chips the embedded RNG hardware is used.
  */
 int rng(uint8_t* dst, unsigned int size);
+
+/**
+ * AES128-CBC encryption with the given key, iv and data. The length must be given in number of blocks. A block is 16 bytes long.
+ */
+void aes128_cbc_enc(const uint8_t key[AES_128_KEYLEN], const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out);
+
+/**
+ * AES128-CBC decryption with the given key, iv and data. The length must be given in number of blocks. A block is 16 bytes long.
+ */
+void aes128_cbc_dec(const uint8_t key[AES_128_KEYLEN], const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out);
 
 #endif /* CRYPTO_H_ */

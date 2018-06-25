@@ -27,6 +27,8 @@
 #include "cifra/sha3.h"
 #include "cifra/hmac.h"
 #include "cifra/pbkdf2.h"
+#include "cifra/aes.h"
+#include "cifra/modes.h"
 #include "uecc/uECC.h"
 
 #if defined(__arm__)
@@ -120,4 +122,30 @@ int rng(uint8_t* dst, unsigned int size) {
   end:
   CLEAR_BIT(RNG->CR, RNG_CR_RNGEN);
   return res;
+}
+
+void _aes_cbc_enc(const uint8_t* key, int keylen, const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out) {
+  cf_cbc cbc_ctx;
+  cf_aes_context aes_ctx;
+
+  cf_aes_init(&aes_ctx, key, keylen);
+  cf_cbc_init(&cbc_ctx, cf_aes, &aes_ctx, iv);
+  cf_cbc_encrypt(&cbc_ctx, data, out, blocks);
+}
+
+void _aes_cbc_dec(const uint8_t* key, int keylen, const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out) {
+  cf_cbc cbc_ctx;
+  cf_aes_context aes_ctx;
+
+  cf_aes_init(&aes_ctx, key, keylen);
+  cf_cbc_init(&cbc_ctx, cf_aes, &aes_ctx, iv);
+  cf_cbc_decrypt(&cbc_ctx, data, out, blocks);
+}
+
+void aes128_cbc_enc(const uint8_t key[AES_128_KEYLEN], const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out) {
+  _aes_cbc_enc(key, AES_128_KEYLEN, iv, data, blocks, out);
+}
+
+void aes128_cbc_dec(const uint8_t key[AES_128_KEYLEN], const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* data, int blocks, uint8_t* out) {
+  _aes_cbc_dec(key, AES_128_KEYLEN, iv, data, blocks, out);
 }
