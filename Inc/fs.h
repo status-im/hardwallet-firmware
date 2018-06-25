@@ -105,4 +105,16 @@ uint32_t* fs_swap_get_free();
  */
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size);
 
+/**
+ * Finds the first free entry and writes the new value. If all pages are full, they are all erased and the new value is written at the beginning
+ * of the first page.
+ */
+int fs_replace_entry(uint32_t page_num, int page_count, int entry_size, const uint32_t *entry);
+
+/**
+ * Similar to fs_replace_entry but applicable to caches. In case the cache is full, only the oldest page is erased and the new entry is placed at
+ * the beginning of the erased page.
+ */
+int fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry);
+
 #endif /* FS_H_ */

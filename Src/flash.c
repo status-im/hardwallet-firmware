@@ -73,7 +73,7 @@ int flash_erase(uint8_t page, uint8_t page_count) {
   return 0;
 }
 
-int flash_copy(uint32_t *src, __IO uint32_t *dst, uint32_t size) {
+int flash_copy(const uint32_t *src, __IO uint32_t *dst, uint32_t size) {
   _flash_wait();
   _flash_clear_errors();
   int ret = 0;

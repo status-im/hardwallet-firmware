@@ -33,7 +33,7 @@ int flash_erase(uint8_t page, uint8_t page_count) {
   return 0;
 }
 
-int flash_copy(uint32_t* src, __IO uint32_t* dst, uint32_t size) {
+int flash_copy(const uint32_t* src, __IO uint32_t* dst, uint32_t size) {
   TEST_CHECK(!(flash_locked || (((uintptr_t) dst) % 4) || (size % 2)));
 
   for(int i = 0; i < size; i += 2) {
@@ -250,6 +250,80 @@ void test_fs_cache_get_free(void) {
   TEST_CHECK(page[1] == (FS_KEY_CACHE_COUNT + 1));
 }
 
+void test_fs_replace_entry(void) {
+  TEST_CHECK(!fs_init());
+
+  uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0X10 };
+  uint32_t* page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0);
+
+  TEST_CHECK(!fs_replace_entry(FS_COUNTERS_PAGE, FS_COUNTERS_PAGE, 4, entry));
+  TEST_CHECK(!memcmp(entry, &page[2], 16));
+
+  for (int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
+    page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, i);
+
+    for (int j = 2; j < FLASH_PAGE_SIZE/4; j++) {
+      page[j] = 0xeeeeeeee;
+    }
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0);
+
+  TEST_CHECK(!fs_replace_entry(FS_COUNTERS_PAGE, FS_COUNTERS_PAGE, 4, entry));
+  TEST_CHECK(!memcmp(entry, &page[2], 16));
+  TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_COUNTERS_ID, 0));
+  TEST_CHECK(page[1] == 1);
+
+  for (int j = 6; j < FLASH_PAGE_SIZE/4; j++) {
+    TEST_CHECK(page[j] == 0xffffffff);
+  }
+
+  for (int i = 1; i < FS_COUNTERS_PAGE; i++) {
+    page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, i);
+    TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_COUNTERS_ID, i));
+    TEST_CHECK(page[1] == 1);
+
+    for (int j = 2; j < FLASH_PAGE_SIZE/4; j++) {
+      TEST_CHECK(page[j] == 0xffffffff);
+    }
+  }
+}
+
+void test_fs_cache_entry(void) {
+  TEST_CHECK(!fs_init());
+
+  uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0X10 };
+  uint32_t* page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 0);
+
+  TEST_CHECK(!fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry));
+  TEST_CHECK(!memcmp(entry, &page[2], 16));
+
+  for (int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
+    page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, i);
+
+    for (int j = 2; j < FLASH_PAGE_SIZE/4; j++) {
+      page[j] = 0xeeeeeeee;
+    }
+  }
+
+  page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 0);
+
+  TEST_CHECK(!fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry));
+  TEST_CHECK(!memcmp(entry, &page[2], 16));
+
+  for (int j = 6; j < FLASH_PAGE_SIZE/4; j++) {
+    TEST_CHECK(page[j] == 0xffffffff);
+  }
+
+  for (int i = 1; i < FS_KEY_CACHE_COUNT; i++) {
+    page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, i);
+
+    for (int j = 2; j < FLASH_PAGE_SIZE/4; j++) {
+      TEST_CHECK(page[j] == 0xeeeeeeee);
+    }
+  }
+}
+
 TEST_LIST = {
    { "fs_init", test_fs_init },
    { "fs_commit", test_fs_commit },
@@ -257,5 +331,7 @@ TEST_LIST = {
    { "fs_find_last_entry", test_fs_find_last_entry },
    { "fs_swap_get_free", test_fs_swap_get_free },
    { "fs_cache_get_free", test_fs_cache_get_free },
+   { "fs_replace_entry", test_fs_replace_entry },
+   { "fs_cache_entry", test_fs_cache_entry },
    { 0 }
 };
