@@ -129,7 +129,7 @@ void _aes_cbc_enc(const uint8_t* key, int keylen, const uint8_t iv[AES_BLOCK_SIZ
   cf_aes_context aes_ctx;
 
   cf_aes_init(&aes_ctx, key, keylen);
-  cf_cbc_init(&cbc_ctx, cf_aes, &aes_ctx, iv);
+  cf_cbc_init(&cbc_ctx, &cf_aes, &aes_ctx, iv);
   cf_cbc_encrypt(&cbc_ctx, data, out, blocks);
 }
 
@@ -138,7 +138,7 @@ void _aes_cbc_dec(const uint8_t* key, int keylen, const uint8_t iv[AES_BLOCK_SIZ
   cf_aes_context aes_ctx;
 
   cf_aes_init(&aes_ctx, key, keylen);
-  cf_cbc_init(&cbc_ctx, cf_aes, &aes_ctx, iv);
+  cf_cbc_init(&cbc_ctx, &cf_aes, &aes_ctx, iv);
   cf_cbc_decrypt(&cbc_ctx, data, out, blocks);
 }
 

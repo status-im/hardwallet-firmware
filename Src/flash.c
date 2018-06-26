@@ -25,12 +25,12 @@
 #include "flash.h"
 
 // Waits for the BSY flag in the FLASH_SR registry to be cleared
-inline void _flash_wait() {
+static inline void _flash_wait() {
   while(READ_BIT(FLASH->SR, FLASH_SR_BSY));
 }
 
 // Clears all flash programming error flags
-inline void _flash_clear_errors() {
+static inline void _flash_clear_errors() {
   SET_BIT(FLASH->ECCR, FLASH_ECCR_ECCD);
   WRITE_REG(FLASH->SR, (FLASH_SR_OPERR | FLASH_SR_PROGERR | FLASH_SR_WRPERR | FLASH_SR_PGAERR | FLASH_SR_SIZERR | FLASH_SR_PGSERR | FLASH_SR_MISERR  | FLASH_SR_FASTERR | FLASH_SR_RDERR | FLASH_SR_OPTVERR));
 }
@@ -43,7 +43,7 @@ int flash_unlock() {
 }
 
 // Erases a single page of flash memory
-int _flash_erase_page(uint8_t pg) {
+static int _flash_erase_page(uint8_t pg) {
   SET_BIT(FLASH->CR, FLASH_CR_BKER);
 
   MODIFY_REG(FLASH->CR, FLASH_CR_PNB, (pg << POSITION_VAL(FLASH_CR_PNB)));

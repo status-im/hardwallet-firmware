@@ -139,9 +139,9 @@ The area reserved for write-once data contains data structures of fixed length a
     |-----------------------------------|
     |      Master Wallet Address        | byte 84-103
     |-----------------------------------|
-    |              Reserved             | byte 104-2031
+    |              Reserved             | byte 104-2015
     |-----------------------------------| 
-    |  PIN encryption key (TEMPORARY!)  | byte 2016-2041
+    |  PIN encryption key (TEMPORARY!)  | byte 2016-2031
     |-----------------------------------| 
     | Master encryption key (TEMPORARY!)| byte 2032-2047
     |===================================|
