@@ -39,7 +39,7 @@
 static int pin_verified = 0;
 
 static uint8_t* _pin_enc_key() {
-  uint32_t* page = FS_PAGE_IDX_ADDR(FS_WRITE_ONCE_PAGE, 0);
+  uint32_t* page = fs_get_page(FS_WRITE_ONCE_PAGE, 0);
   return (uint8_t*)(&page[PIN_ENC_KEY_IDX]);
 }
 
@@ -47,19 +47,37 @@ static int _pin_encrypt(const uint8_t iv[AES_BLOCK_SIZE], const uint8_t* pin, ui
   if (pin[0] < PIN_MIN_LEN || pin[0] > PIN_MAX_LEN) return -1;
   int pin_data_len = (pin[0] + 1);
   memcpy(out, pin, pin_data_len);
-  memset(&out[pin_data_len], 0, ((AES_BLOCK_SIZE * 2) - pin_data_len));
+  memset(&out[pin_data_len], 0, (AES_BLOCK_SIZE - pin_data_len));
   aes128_cbc_enc(_pin_enc_key(), iv, out, 1, &out[AES_BLOCK_SIZE]);
   memcpy(out, iv, AES_BLOCK_SIZE);
 
   return 0;
 }
 
+int _pin_set(uint8_t* pin) {
+  uint32_t enc_pin[PIN_ENTRY_SIZE];
+  uint32_t iv[AES_BLOCK_SIZE/4];
+  if (!rng((uint8_t*) iv, AES_BLOCK_SIZE)) return -1;
+  if (_pin_encrypt((uint8_t*) iv, pin, (uint8_t*) enc_pin)) return -1;
+  return fs_replace_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE, enc_pin);
+}
+
 int pin_set(uint8_t* pin) {
-  return -1;
+  if (fs_find_last_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE)) return -1;
+
+  if (fs_find_last_entry(FS_COUNTERS_PAGE, FS_COUNTERS_COUNT, PIN_COUNTER_ENTRY_SIZE) == NULL) {
+    uint32_t counters[PIN_COUNTER_ENTRY_SIZE] = { 0, 0 };
+    fs_replace_entry(FS_COUNTERS_PAGE, FS_COUNTERS_COUNT, PIN_COUNTER_ENTRY_SIZE, counters);
+  }
+
+  return _pin_set(pin);
 }
 
 int pin_change(uint8_t* old_pin, uint8_t* new_pin) {
-  return -1;
+  int res = pin_verify(old_pin);
+  if (res != 1) return res;
+  res = _pin_set(new_pin);
+  return (res == -1) ? -1 : !res;
 }
 
 static int _pin_remaining_tries(uint32_t *out) {
@@ -82,12 +100,15 @@ int pin_remaining_tries() {
 }
 
 int pin_verify(uint8_t* pin) {
+  pin_verified = 0;
+
   uint32_t counters[PIN_COUNTER_ENTRY_SIZE];
-  int tries = _pin_remaining_tries(counters);
-  if (tries <= 0) return 0;
 
   uint32_t* actual_pin = fs_find_last_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE);
   if (!actual_pin) return -1;
+
+  int tries = _pin_remaining_tries(counters);
+  if (tries <= 0) return 0;
 
   uint32_t* enc_pin[PIN_ENTRY_SIZE];
   _pin_encrypt((uint8_t*) actual_pin, pin, (uint8_t*) enc_pin);
@@ -97,6 +118,8 @@ int pin_verify(uint8_t* pin) {
       counters[1] &= ~PIN_RETRY_COUNTER_MASK;
       fs_replace_entry(FS_COUNTERS_PAGE, FS_COUNTERS_COUNT, PIN_COUNTER_ENTRY_SIZE, counters);
     }
+
+    pin_verified = 1;
 
     return 1;
   } else {
