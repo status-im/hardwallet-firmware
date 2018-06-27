@@ -25,6 +25,16 @@
 #include "fs.h"
 #include <stddef.h>
 
+#define FS_START (UPGRADE_FW_START + FIRMWARE_SIZE)
+#define FS_FIRST_PAGE (UPGRADE_FW_FIRST_PAGE + FIRMWARE_PAGE_COUNT)
+#define FS_PAGE_COUNT ((FLASH_BANK_SIZE / FLASH_PAGE_SIZE) - FS_FIRST_PAGE)
+
+#define FS_PAGE_IDX_ADDR(p, i) ((uint32_t*)(FS_START + ((p + i) * FLASH_PAGE_SIZE)))
+#define FS_ABS_IDX_PAGE(p, i) (FS_FIRST_PAGE + p + i)
+
+#define FS_PAGE_ADDR(p) FS_PAGE_IDX_ADDR(p, 0)
+#define FS_ABS_PAGE(p) FS_ABS_IDX_PAGE(p, 0)
+
 #define FS_HEADER(h, m, c) h[0] = m; h[1] = c;
 
 #define FS_FREE -1
@@ -181,6 +191,10 @@ int fs_commit() {
 ret:
   flash_lock();
   return res;
+}
+
+inline uint32_t* fs_get_page(uint32_t base_page, int index) {
+  return FS_PAGE_IDX_ADDR(base_page, index);
 }
 
 static uint32_t* _fs_find_free_entry(uint32_t* page, int entry_size) {

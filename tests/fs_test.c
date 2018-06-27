@@ -144,6 +144,14 @@ void test_fs_commit(void) {
   TEST_CHECK(swap3[0] == 0xffffffff);
 }
 
+void test_fs_get_page(void) {
+  TEST_CHECK(!fs_init());
+  uint32_t* page = fs_get_page(FS_WRITE_ONCE_PAGE, 0);
+  TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_WRITE_ONCE_ID, 0));
+  page = fs_get_page(FS_PINLESS_LIST_PAGE, 1);
+  TEST_CHECK(page[0] == FS_V1_PAGE_ID(FS_PINLESS_LIST_ID, 1));
+}
+
 void test_fs_find_free_entry(void) {
   TEST_CHECK(!fs_init());
 
@@ -327,6 +335,7 @@ void test_fs_cache_entry(void) {
 TEST_LIST = {
    { "fs_init", test_fs_init },
    { "fs_commit", test_fs_commit },
+   { "fs_get_page", test_fs_get_page },
    { "fs_find_free_entry", test_fs_find_free_entry },
    { "fs_find_last_entry", test_fs_find_last_entry },
    { "fs_swap_get_free", test_fs_swap_get_free },

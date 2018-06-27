@@ -28,10 +28,6 @@
 #include "flash.h"
 #include <stdint.h>
 
-#define FS_START (UPGRADE_FW_START + FIRMWARE_SIZE)
-#define FS_FIRST_PAGE (UPGRADE_FW_FIRST_PAGE + FIRMWARE_PAGE_COUNT)
-#define FS_PAGE_COUNT ((FLASH_BANK_SIZE / FLASH_PAGE_SIZE) - FS_FIRST_PAGE)
-
 #define FS_WRITE_ONCE_ID 0x574f0000
 #define FS_WRITE_ONCE_PAGE 0
 #define FS_WRITE_ONCE_COUNT 1
@@ -62,12 +58,6 @@
 #define FS_PAGE_ID(p, v, i) (p | (v << 8) | i)
 #define FS_V1_PAGE_ID(p, i) FS_PAGE_ID(p, 1, i)
 
-#define FS_PAGE_IDX_ADDR(p, i) ((uint32_t*)(FS_START + ((p + i) * FLASH_PAGE_SIZE)))
-#define FS_ABS_IDX_PAGE(p, i) (FS_FIRST_PAGE + p + i)
-
-#define FS_PAGE_ADDR(p) FS_PAGE_IDX_ADDR(p, 0)
-#define FS_ABS_PAGE(p) FS_ABS_IDX_PAGE(p, 0)
-
 /**
  * Erases and initialize the filesystem. Return 0 on success.
  */
@@ -77,6 +67,11 @@ int fs_init();
  * Commits the changes from the swap pages to the filesystem
  */
 int fs_commit();
+
+/**
+ * Gets the address of the page. This function is needed for easy stubbing in unit tests.
+ */
+uint32_t* fs_get_page(uint32_t base_page, int index);
 
 /**
  * Scans the requested number of consecutive pages, starting at the given page number until empty space for a new entry is found.
