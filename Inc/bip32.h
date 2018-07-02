@@ -36,9 +36,11 @@ typedef struct {
 
 // Padding is needed for alignment reasons. We store keys in compressed format for storage efficiency and because we do not need to verify signatures.
 typedef struct {
-  uint8_t padding[3];
-  uint8_t y;
+  uint8_t padding[2];
+  uint8_t has_full_y;
+  uint8_t y_comp;
   uint8_t x[KEY_COMPONENT_LEN];
+  uint8_t y[KEY_COMPONENT_LEN];
 } bip32_pub_key_t;
 
 /**

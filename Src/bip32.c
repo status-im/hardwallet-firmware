@@ -27,6 +27,13 @@
 #include "bignum256.h"
 #include <string.h>
 
+void _bip32_out_pubkey(const bignum256_t* pub_x, const bignum256_t* pub_y, bip32_pub_key_t* out_pub) {
+  bignum256_to_bytes(pub_x, out_pub->x);
+  bignum256_to_bytes(pub_y, out_pub->y);
+  out_pub->y_comp = 2 + (out_pub->y[(KEY_COMPONENT_LEN - 1)] & 0x01);
+  out_pub->has_full_y = 1;
+}
+
 int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub) {
   uint32_t _tmp[(KEY_COMPONENT_LEN * 3) / 4]; // declare for word access
   uint8_t *tmp = (uint8_t *) _tmp;
@@ -36,7 +43,7 @@ int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_
     tmp[0] = 0;
     memcpy(&tmp[1], priv_key->key, KEY_COMPONENT_LEN);
   } else {
-    tmp[0] = pub_key->y;
+    tmp[0] = pub_key->y_comp;
     memcpy(&tmp[1], pub_key->x, KEY_COMPONENT_LEN);
   }
 
@@ -70,8 +77,7 @@ int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_
   if (out_pub != NULL) {
     // a bit hacky, but priv_num and out_num are sequential in memory so this works
     bignum256_secp256k1_publickey(res_num, priv_num);
-    bignum256_to_bytes(priv_num, out_pub->x);
-    out_pub->y = 2 + bignum256_read_bit(out_num, 0);
+    _bip32_out_pubkey(priv_num, out_num, out_pub);
   }
 
   return 0;
@@ -87,7 +93,6 @@ void bip32_master_key(const uint8_t* seed, int seed_len, bip32_priv_key_t* out_p
   hmac_sha512((uint8_t*)"Bitcoin Seed", 12, seed, seed_len, out_priv->key);
   bignum256_from_bytes(out_priv->key, priv_num);
   bignum256_secp256k1_publickey(priv_num, pub_x);
-  bignum256_to_bytes(pub_x, out_pub->x);
-  out_pub->y = 2 + bignum256_read_bit(pub_y, 0);
+  _bip32_out_pubkey(pub_x, pub_y, out_pub);
 }
 
