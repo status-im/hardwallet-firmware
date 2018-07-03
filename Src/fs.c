@@ -44,44 +44,41 @@
 #define FS_ZEROED_ENTRY 0x00000000
 #define FS_CLEAR_ENTRY 0xffffffff
 
-#define FS_FLASH_PAGE_SIZE (FLASH_PAGE_SIZE/4)
-#define FS_FLASH_PAGE_DATA_SIZE (FS_FLASH_PAGE_SIZE - 2)
-
 int fs_init() {
   int res = -1;
 
   if (flash_unlock() || flash_erase(FS_FIRST_PAGE, FS_PAGE_COUNT)) goto ret;
 
-  uint32_t header[2];
+  uint32_t header[FS_HEADER_SIZE];
 
   FS_HEADER(header, FS_V1_PAGE_ID(FS_WRITE_ONCE_ID, 0), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_WRITE_ONCE_PAGE, 0), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_WRITE_ONCE_PAGE, 0), FS_HEADER_SIZE)) goto ret;
 
   FS_HEADER(header, FS_V1_PAGE_ID(FS_PIN_DATA_ID, 0), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PIN_DATA_PAGE, 0), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PIN_DATA_PAGE, 0), FS_HEADER_SIZE)) goto ret;
 
   FS_HEADER(header, FS_V1_PAGE_ID(FS_COUNTERS_ID, 0), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0), FS_HEADER_SIZE)) goto ret;
   FS_HEADER(header, FS_V1_PAGE_ID(FS_COUNTERS_ID, 1), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 1), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 1), FS_HEADER_SIZE)) goto ret;
 
   FS_HEADER(header, FS_V1_PAGE_ID(FS_PINLESS_LIST_ID, 0), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 0), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 0), FS_HEADER_SIZE)) goto ret;
   FS_HEADER(header, FS_V1_PAGE_ID(FS_PINLESS_LIST_ID, 1), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 1), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 1), FS_HEADER_SIZE)) goto ret;
   FS_HEADER(header, FS_V1_PAGE_ID(FS_PINLESS_LIST_ID, 2), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 2), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_PINLESS_LIST_PAGE, 2), FS_HEADER_SIZE)) goto ret;
 
   FS_HEADER(header, FS_V1_PAGE_ID(FS_SETTINGS_ID, 0), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 0), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 0), FS_HEADER_SIZE)) goto ret;
   FS_HEADER(header, FS_V1_PAGE_ID(FS_SETTINGS_ID, 1), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 1), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 1), FS_HEADER_SIZE)) goto ret;
   FS_HEADER(header, FS_V1_PAGE_ID(FS_SETTINGS_ID, 2), 0);
-  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 2), 2)) goto ret;
+  if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 2), FS_HEADER_SIZE)) goto ret;
 
   for (int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
     FS_HEADER(header, FS_V1_PAGE_ID(FS_KEY_CACHE_ID, i), i);
-    if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, i), 2)) goto ret;
+    if(flash_copy(header, FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, i), FS_HEADER_SIZE)) goto ret;
   }
 
   res = 0;
@@ -149,12 +146,12 @@ static int _fs_commit_page(uint32_t* page, int target_p) {
 
   if (page[1] > target[1]) {
     if (flash_erase(FS_ABS_PAGE(target_p), 1)) return -1;
-    if (flash_copy(&page[2], &target[2], _fs_actual_size(page))) return -1;
-    if (flash_copy(page, target, 2)) return -1;
+    if (flash_copy(&page[FS_HEADER_SIZE], &target[FS_HEADER_SIZE], _fs_actual_size(page))) return -1;
+    if (flash_copy(page, target, FS_HEADER_SIZE)) return -1;
   }
 
-  uint32_t header[2] = {0, 0};
-  if (flash_copy(header, page, 2)) return -1;
+  uint32_t header[FS_HEADER_SIZE] = {0, 0};
+  if (flash_copy(header, page, FS_HEADER_SIZE)) return -1;
 
   return 0;
 }
@@ -201,7 +198,7 @@ inline uint32_t* fs_get_page(uint32_t base_page, int index) {
 }
 
 static uint32_t* _fs_find_free_entry(uint32_t* page, int entry_size) {
-  for (int i = 2; i < FS_FLASH_PAGE_SIZE; i += entry_size) {
+  for (int i = FS_HEADER_SIZE; i < FS_FLASH_PAGE_SIZE; i += entry_size) {
     if (page[i] == FS_CLEAR_ENTRY) {
       return &page[i];
     }
@@ -234,7 +231,7 @@ uint32_t* fs_find_last_entry(uint32_t page_num, int page_count, int entry_size) 
   if (!free_addr) {
     free_addr = &page[(page_count * FS_FLASH_PAGE_SIZE)] - (FS_FLASH_PAGE_DATA_SIZE % entry_size);
   } else if (!((((intptr_t) free_addr - (intptr_t) page) - 8) % FLASH_PAGE_SIZE)) {
-    free_addr -= (2 + (FS_FLASH_PAGE_DATA_SIZE % entry_size));
+    free_addr -= (FS_HEADER_SIZE + (FS_FLASH_PAGE_DATA_SIZE % entry_size));
   }
 
   return free_addr - entry_size;
@@ -286,16 +283,16 @@ static uint32_t * _fs_cache_free_oldest(uint32_t cache_start, int page_count) {
     }
   }
 
-  uint32_t header[2];
+  uint32_t header[FS_HEADER_SIZE];
   FS_HEADER(header, addr[0], (highwc + 1));
 
   if(flash_unlock()) goto ret;
 
-  if (flash_erase(FS_ABS_IDX_PAGE(cache_start, page_idx), 1) || flash_copy(header, addr, 2)) {
+  if (flash_erase(FS_ABS_IDX_PAGE(cache_start, page_idx), 1) || flash_copy(header, addr, FS_HEADER_SIZE)) {
     addr = NULL;
     goto ret;
   } else {
-    addr = &addr[2];
+    addr = &addr[FS_HEADER_SIZE];
   }
 
 ret:
@@ -330,19 +327,19 @@ static int _fs_rewrite_entry(uint32_t page_num, int page_count, int entry_size, 
 
   if (flash_unlock()) goto ret;
 
-  uint32_t header[2];
+  uint32_t header[FS_HEADER_SIZE];
   uint32_t* page = FS_PAGE_IDX_ADDR(page_num, 0);
   FS_HEADER(header, page[0], (page[1] + 1));
 
-  if (flash_copy(entry, &free[2], entry_size)) goto ret;
-  if (flash_copy(header, free, 2)) goto ret;
+  if (flash_copy(entry, &free[FS_HEADER_SIZE], entry_size)) goto ret;
+  if (flash_copy(header, free, FS_HEADER_SIZE)) goto ret;
 
   for (int i = 1; i < page_count; i++) {
     free = fs_swap_get_free();
     if (!free) goto ret;
     page = FS_PAGE_IDX_ADDR(page_num, i);
     FS_HEADER(header, page[0], (page[1] + 1));
-    if (flash_copy(header, free, 2)) goto ret;
+    if (flash_copy(header, free, FS_HEADER_SIZE)) goto ret;
   }
 
   res = 0;

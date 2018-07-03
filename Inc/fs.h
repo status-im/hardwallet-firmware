@@ -28,6 +28,10 @@
 #include "flash.h"
 #include <stdint.h>
 
+#define FS_FLASH_PAGE_SIZE (FLASH_PAGE_SIZE/4)
+#define FS_HEADER_SIZE 2
+#define FS_FLASH_PAGE_DATA_SIZE (FS_FLASH_PAGE_SIZE - FS_HEADER_SIZE)
+
 #define FS_WRITE_ONCE_ID 0x574f0000
 #define FS_WRITE_ONCE_PAGE 0
 #define FS_WRITE_ONCE_COUNT 1
