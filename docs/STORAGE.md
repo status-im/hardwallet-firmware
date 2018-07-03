@@ -137,9 +137,11 @@ The area reserved for write-once data contains data structures of fixed length a
     |-----------------------------------|
     |Master Wallet Priv Key (encrypted) | byte 52-83
     |-----------------------------------|
-    |      Master Wallet Address        | byte 84-103
+    |        Master Wallet Chain        | byte 84-115
     |-----------------------------------|
-    |              Reserved             | byte 104-2015
+    |       Master Wallet Address       | byte 116-135
+    |-----------------------------------|
+    |              Reserved             | byte 136-2015
     |-----------------------------------| 
     |  PIN encryption key (TEMPORARY!)  | byte 2016-2031
     |-----------------------------------| 
@@ -206,6 +208,6 @@ The cache of derived keys is used to store all keys which have been derived usin
 
 New cache entries can be only appended. When the cache is full, the oldest page will simply be erased and appending will continue from there. The write counter of the header is used in a different manner from other pages, it is a sequence indicating the page order. When the cache is full, the page with the lowest counter will be erased. The fresh page will have a counter which is 1 higher than the previous last page. This allows erasing the cache in a cyclic manner, balancing the load on all pages. The cache does not use page rewriting, so the swap pages are not used.
 
-Each entry is 136 bytes long, meaning we can fit 15 keys in a single page. We have allocated 30 pages meaning 450 keys at once. This should be enough to never fill the cache by normal usage. We have a lot of unallocated pages however, so we might allocate even more pages if needed.
+Each entry is 168 bytes long, meaning we can fit 12 keys in a single page. We have allocated 30 pages meaning 360 keys at once. This should be enough to never fill the cache by normal usage. We have a lot of unallocated pages however, so we might allocate even more pages if needed.
 
 When searching the cache, the code should keep track of the longest match found. This allows, even in case of a cache miss, to at least start key derivation from an intermediate step. When deriving a key, all intermediates should be written to the cache (without duplicates).

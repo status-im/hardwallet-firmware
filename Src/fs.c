@@ -44,6 +44,9 @@
 #define FS_ZEROED_ENTRY 0x00000000
 #define FS_CLEAR_ENTRY 0xffffffff
 
+#define FS_FLASH_PAGE_SIZE (FLASH_PAGE_SIZE/4)
+#define FS_FLASH_PAGE_DATA_SIZE (FS_FLASH_PAGE_SIZE - 2)
+
 int fs_init() {
   int res = -1;
 
@@ -198,7 +201,7 @@ inline uint32_t* fs_get_page(uint32_t base_page, int index) {
 }
 
 static uint32_t* _fs_find_free_entry(uint32_t* page, int entry_size) {
-  for (int i = 2; i < (FLASH_PAGE_SIZE/4); i += entry_size) {
+  for (int i = 2; i < FS_FLASH_PAGE_SIZE; i += entry_size) {
     if (page[i] == FS_CLEAR_ENTRY) {
       return &page[i];
     }
@@ -229,9 +232,9 @@ uint32_t* fs_find_last_entry(uint32_t page_num, int page_count, int entry_size) 
   uint32_t* free_addr = fs_find_free_entry(page_num, page_count, entry_size);
 
   if (!free_addr) {
-    free_addr = &page[(page_count * (FLASH_PAGE_SIZE/4))];
+    free_addr = &page[(page_count * FS_FLASH_PAGE_SIZE)] - (FS_FLASH_PAGE_DATA_SIZE % entry_size);
   } else if (!((((intptr_t) free_addr - (intptr_t) page) - 8) % FLASH_PAGE_SIZE)) {
-    free_addr -= 2;
+    free_addr -= (2 + (FS_FLASH_PAGE_DATA_SIZE % entry_size));
   }
 
   return free_addr - entry_size;

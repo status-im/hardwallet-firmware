@@ -184,21 +184,21 @@ void test_fs_find_free_entry(void) {
 
 void test_fs_find_last_entry(void) {
   TEST_CHECK(!fs_init());
-  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == NULL);
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 8) == NULL);
 
   uint32_t* page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 0);
   page[2] = 0;
-  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[2]);
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 8) == &page[2]);
 
   for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
     page[i] = 0;
   }
 
-  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[502]);
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 8) == &page[498]);
   page = FS_PAGE_IDX_ADDR(FS_SETTINGS_PAGE, 1);
   page[2] = 0;
-  page[12] = 0;
-  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[12]);
+  page[10] = 0;
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 8) == &page[10]);
 
   for (int i = 2; i < FLASH_PAGE_SIZE/4; i++) {
     page[i] = 0;
@@ -210,7 +210,7 @@ void test_fs_find_last_entry(void) {
     page[i] = 0;
   }
 
-  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 10) == &page[502]);
+  TEST_CHECK(fs_find_last_entry(FS_SETTINGS_PAGE, FS_SETTINGS_COUNT, 8) == &page[498]);
 }
 
 void test_fs_swap_get_free(void) {
