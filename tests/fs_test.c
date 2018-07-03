@@ -258,10 +258,20 @@ void test_fs_cache_get_free(void) {
   TEST_CHECK(page[1] == (FS_KEY_CACHE_COUNT + 1));
 }
 
+void test_fs_write_entry(void) {
+  TEST_CHECK(!fs_init());
+
+  uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
+  uint32_t* page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0);
+
+  TEST_CHECK(!fs_write_entry(&page[2], entry, 4));
+  TEST_CHECK(!memcmp(entry, &page[2], 16));
+}
+
 void test_fs_replace_entry(void) {
   TEST_CHECK(!fs_init());
 
-  uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0X10 };
+  uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
   uint32_t* page = FS_PAGE_IDX_ADDR(FS_COUNTERS_PAGE, 0);
 
   TEST_CHECK(!fs_replace_entry(FS_COUNTERS_PAGE, FS_COUNTERS_PAGE, 4, entry));
@@ -340,6 +350,7 @@ TEST_LIST = {
    { "fs_find_last_entry", test_fs_find_last_entry },
    { "fs_swap_get_free", test_fs_swap_get_free },
    { "fs_cache_get_free", test_fs_cache_get_free },
+   { "fs_write_entry", test_fs_write_entry },
    { "fs_replace_entry", test_fs_replace_entry },
    { "fs_cache_entry", test_fs_cache_entry },
    { 0 }

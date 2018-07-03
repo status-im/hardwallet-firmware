@@ -44,7 +44,7 @@ void kekkac256(const uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
   cf_sha3_256_digest_final(&ctx, hash);
 }
 
-void sha256(const uint8_t* data, int len, uint8_t hash[KEKKAC_256_LEN]) {
+void sha256(const uint8_t* data, int len, uint8_t hash[SHA_256_LEN]) {
   cf_sha256_context ctx;
   cf_sha256_init(&ctx);
   cf_sha256_update(&ctx, data, len);

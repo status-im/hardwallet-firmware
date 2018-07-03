@@ -313,7 +313,7 @@ uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size
   return free_addr;
 }
 
-static int _fs_write_entry(uint32_t* addr, const uint32_t* entry, int entry_size) {
+int fs_write_entry(uint32_t* addr, const uint32_t* entry, int entry_size) {
   int res = 0;
 
   if(flash_unlock() || flash_copy(entry, addr, entry_size)) res = -1;
@@ -356,7 +356,7 @@ int fs_replace_entry(uint32_t page_num, int page_count, int entry_size, const ui
   uint32_t* free = fs_find_free_entry(page_num, page_count, entry_size);
 
   if (free) {
-    return _fs_write_entry(free, entry, entry_size);
+    return fs_write_entry(free, entry, entry_size);
   } else {
     return _fs_rewrite_entry(page_num, page_count, entry_size, entry) || fs_commit();
   }
@@ -365,5 +365,5 @@ int fs_replace_entry(uint32_t page_num, int page_count, int entry_size, const ui
 int fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry) {
   uint32_t* free = fs_cache_get_free(cache_start, page_count, entry_size);
   if (!free) return -1;
-  return _fs_write_entry(free, entry, entry_size);
+  return fs_write_entry(free, entry, entry_size);
 }

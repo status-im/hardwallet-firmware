@@ -101,6 +101,11 @@ uint32_t* fs_swap_get_free();
 uint32_t* fs_cache_get_free(uint32_t cache_start, int page_count, int entry_size);
 
 /**
+ * Writes an entry at the given address. No check is performed on the address alignment. Return -1 if the write fails.
+ */
+int fs_write_entry(uint32_t* addr, const uint32_t* entry, int entry_size);
+
+/**
  * Finds the first free entry and writes the new value. If all pages are full, they are all erased and the new value is written at the beginning
  * of the first page.
  */
