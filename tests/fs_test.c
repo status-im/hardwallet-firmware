@@ -313,7 +313,7 @@ void test_fs_cache_entry(void) {
   uint32_t entry[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0X10 };
   uint32_t* page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 0);
 
-  TEST_CHECK(!fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry));
+  TEST_CHECK(fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry) == &page[2]);
   TEST_CHECK(!memcmp(entry, &page[2], 16));
 
   for (int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
@@ -326,7 +326,7 @@ void test_fs_cache_entry(void) {
 
   page = FS_PAGE_IDX_ADDR(FS_KEY_CACHE_PAGE, 0);
 
-  TEST_CHECK(!fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry));
+  TEST_CHECK(fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, 4, entry) == &page[2]);
   TEST_CHECK(!memcmp(entry, &page[2], 16));
 
   for (int j = 6; j < FLASH_PAGE_SIZE/4; j++) {

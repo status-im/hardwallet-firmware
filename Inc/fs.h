@@ -117,8 +117,8 @@ int fs_replace_entry(uint32_t page_num, int page_count, int entry_size, const ui
 
 /**
  * Similar to fs_replace_entry but applicable to caches. In case the cache is full, only the oldest page is erased and the new entry is placed at
- * the beginning of the erased page.
+ * the beginning of the erased page. Returns a pointer to the cached entry.
  */
-int fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry);
+uint32_t* fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry);
 
 #endif /* FS_H_ */

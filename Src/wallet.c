@@ -28,6 +28,7 @@
 #include "wallet.h"
 #include "crypto.h"
 #include "fs.h"
+#include "handy.h"
 
 #define WALLET_ENC_KEY_IDX 508
 #define WALLET_MK_IDX 2
@@ -45,11 +46,6 @@ typedef struct {
   uint8_t chain[BIP32_KEY_COMPONENT_LEN];
   uint8_t addr[WALLET_ADDR_LEN];
 } wallet_key_t;
-
-typedef struct {
-  uint32_t path[WALLET_PATH_LEN];
-  wallet_key_t key;
-} wallet_ck_t;
 
 static uint8_t* _wallet_enc_key() {
   uint32_t* page = fs_get_page(FS_WRITE_ONCE_PAGE, 0);
@@ -117,9 +113,49 @@ static wallet_key_t* _wallet_closest_cache_entry(const uint32_t path[WALLET_PATH
   return res;
 }
 
-static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wallet_key_t* base_key, int base_level, uint8_t plain_priv_key[BIP32_KEY_COMPONENT_LEN]) {
-  //TODO: implement this
-  return NULL;
+static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wallet_key_t* base_key, int level, uint8_t plain_priv_key[BIP32_KEY_COMPONENT_LEN]) {
+  bip32_priv_key_t priv1;
+  bip32_priv_key_t priv2;
+  bip32_pub_key_t pub1;
+  bip32_pub_key_t pub2;
+
+  uint32_t key_entry[WALLET_KEY_SIZE];
+  memcpy(&key_entry[1], &path[1], (level << 2));
+  memset(&key_entry[level], 0xff, ((WALLET_PATH_LEN - level) << 2));
+
+  bip32_priv_key_t* parent_priv = &priv1;
+  bip32_pub_key_t* parent_pub = &pub1;
+
+  bip32_priv_key_t* child_priv = &priv2;
+  bip32_pub_key_t* child_pub = &pub2;
+
+  aes128_cbc_dec(_wallet_enc_key(), base_key->rand, base_key->priv_key, ((BIP32_KEY_COMPONENT_LEN * 2) / 16), parent_priv->key); // decrypts private key and chain
+  memcpy(&parent_pub->y_comp, base_key->pub_key, WALLET_PUBKEY_LEN);
+
+  uint32_t *res;
+
+  while(++level <= path[0]) {
+    if (bip32_ckd_private(path[level], parent_priv, parent_pub, child_priv, child_pub)) return NULL;
+
+    key_entry[0] = level;
+    key_entry[level] = path[level];
+
+    if (_wallet_make_key((wallet_key_t*)&key_entry[WALLET_PATH_LEN], child_priv, child_pub)) return NULL;
+    res = fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, WALLET_KEY_SIZE, key_entry);
+
+    if (!res) {
+      return -1;
+    }
+
+    SWAP(parent_priv, child_priv);
+    SWAP(parent_pub, child_pub);
+  }
+
+  if (plain_priv_key) {
+    memcpy(plain_priv_key, parent_priv->key, BIP32_KEY_COMPONENT_LEN);
+  }
+
+  return (wallet_key_t*) &res[WALLET_PATH_LEN];
 }
 
 int _wallet_get_key(const uint32_t path[WALLET_PATH_LEN], wallet_key_t** out, uint8_t plain_priv_key[BIP32_KEY_COMPONENT_LEN]) {

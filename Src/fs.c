@@ -359,8 +359,8 @@ int fs_replace_entry(uint32_t page_num, int page_count, int entry_size, const ui
   }
 }
 
-int fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry) {
+uint32_t* fs_cache_entry(uint32_t cache_start, int page_count, int entry_size, const uint32_t *entry) {
   uint32_t* free = fs_cache_get_free(cache_start, page_count, entry_size);
-  if (!free) return -1;
-  return fs_write_entry(free, entry, entry_size);
+  if (!free) return NULL;
+  return fs_write_entry(free, entry, entry_size) ? NULL : free;
 }
