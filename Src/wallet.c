@@ -132,7 +132,7 @@ static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wa
   aes128_cbc_dec(_wallet_enc_key(), base_key->rand, base_key->priv_key, ((BIP32_KEY_COMPONENT_LEN * 2) / 16), parent_priv->key); // decrypts private key and chain
   memcpy(&parent_pub->y_comp, base_key->pub_key, WALLET_PUBKEY_LEN);
 
-  uint32_t *res;
+  uint32_t *res = NULL;
 
   while(++level <= path[0]) {
     if (bip32_ckd_private(path[level], parent_priv, parent_pub, child_priv, child_pub)) return NULL;
@@ -144,7 +144,7 @@ static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wa
     res = fs_cache_entry(FS_KEY_CACHE_PAGE, FS_KEY_CACHE_COUNT, WALLET_KEY_SIZE, key_entry);
 
     if (!res) {
-      return -1;
+      return NULL;
     }
 
     SWAP(parent_priv, child_priv);
@@ -155,7 +155,7 @@ static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wa
     memcpy(plain_priv_key, parent_priv->key, BIP32_KEY_COMPONENT_LEN);
   }
 
-  return (wallet_key_t*) &res[WALLET_PATH_LEN];
+  return (wallet_key_t*) (res ? &res[WALLET_PATH_LEN] : res);
 }
 
 int _wallet_get_key(const uint32_t path[WALLET_PATH_LEN], wallet_key_t** out, uint8_t plain_priv_key[BIP32_KEY_COMPONENT_LEN]) {
