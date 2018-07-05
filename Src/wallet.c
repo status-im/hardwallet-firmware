@@ -89,7 +89,11 @@ int wallet_new(const uint8_t* seed, int seed_len) {
 
 static wallet_key_t* _wallet_closest_cache_entry(const uint32_t path[WALLET_PATH_LEN], int* found_level) {
   *found_level = 0;
-  wallet_key_t* res = (wallet_key_t*) _wallet_mk();
+
+  uint32_t* mk = _wallet_mk();
+  if (mk[0] == 0xffffffff) return NULL;
+
+  wallet_key_t* res = (wallet_key_t*) mk;
 
   for (int i = 0; i < FS_KEY_CACHE_COUNT; i++) {
     uint32_t* page = fs_get_page(FS_KEY_CACHE_PAGE, i);
@@ -98,7 +102,7 @@ static wallet_key_t* _wallet_closest_cache_entry(const uint32_t path[WALLET_PATH
       if (page[i] == 0xffffffff) {
         return res;
       } else if ((page[i] <= path[0]) && (page[i] > *found_level)) {
-        if (!memcmp(&page[i+1], &path[1], page[i])) {
+        if (!memcmp(&page[i+1], &path[1], (page[i] * 4))) {
           *found_level = page[i];
           res = (wallet_key_t*)(&page[i + WALLET_PATH_LEN]);
 
@@ -121,7 +125,7 @@ static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wa
 
   uint32_t key_entry[WALLET_KEY_SIZE];
   memcpy(&key_entry[1], &path[1], (level << 2));
-  memset(&key_entry[level], 0xff, ((WALLET_PATH_LEN - level) << 2));
+  memset(&key_entry[1 + level], 0xff, ((WALLET_PATH_LEN - level - 1) << 2));
 
   bip32_priv_key_t* parent_priv = &priv1;
   bip32_pub_key_t* parent_pub = &pub1;
@@ -159,8 +163,12 @@ static wallet_key_t* _wallet_derive_key(const uint32_t path[WALLET_PATH_LEN], wa
 }
 
 int _wallet_get_key(const uint32_t path[WALLET_PATH_LEN], wallet_key_t** out, uint8_t plain_priv_key[BIP32_KEY_COMPONENT_LEN]) {
+  if (path[0] < 1 || path[0] > 9) return -1;
+
   int level;
   wallet_key_t* key = _wallet_closest_cache_entry(path, &level);
+
+  if (key == NULL) return -1;
 
   if (level == path[0]) {
     if (plain_priv_key) {
