@@ -58,8 +58,7 @@
 
 /** Like memset(ptr, 0, len), but not allowed to be removed by
  *  compilers. */
-static inline void mem_clean(volatile void *v, size_t len)
-{
+static inline void mem_clean(volatile void *v, size_t len) {
   if (len)
   {
     memset((void *) v, 0, len);
@@ -69,8 +68,7 @@ static inline void mem_clean(volatile void *v, size_t len)
 
 /** Returns 1 if len bytes at va equal len bytes at vb, 0 if they do not.
  *  Does not leak length of common prefix through timing. */
-static inline unsigned mem_eq(const void *va, const void *vb, size_t len)
-{
+static inline unsigned mem_eq(const void *va, const void *vb, size_t len) {
   const volatile uint8_t *a = va;
   const volatile uint8_t *b = vb;
   uint8_t diff = 0;
@@ -81,6 +79,16 @@ static inline unsigned mem_eq(const void *va, const void *vb, size_t len)
   }
 
   return !diff;
+}
+
+static inline uint32_t wordcmp(const uint32_t* a, const uint32_t* b, size_t len) {
+  while (len-- > 0) {
+    if (*a++ != *b++) {
+      return a[-1] < b[-1] ? -1 : 1;
+    }
+  }
+
+  return 0;
 }
 
 #endif

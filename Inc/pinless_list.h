@@ -22,32 +22,24 @@
  * SOFTWARE.
  */
 
-#ifndef WALLET_H_
-#define WALLET_H_
+#ifndef PINLESS_LIST_H_
+#define PINLESS_LIST_H_
 
-#include "bip32.h"
-
-#define WALLET_PATH_LEN 10
-#define WALLET_ADDR_LEN 20
+#include "wallet.h"
 
 /**
- * Creates a new BIP32-compatible wallet starting from the given seed. If a wallet already exist or if an error is encountered when generating the wallet, -1 is returned. Returns 0 on success.
+ * Returns 1 if the list contains the given path, 0 otherwise.
  */
-int wallet_new(const uint8_t* seed, int seed_len);
+int pinless_list_contains(const uint32_t path[WALLET_PATH_LEN]);
 
 /**
- * Gets the private key for the child wallet with the given path. Returns 0 on success, -1 on failure. Performs key derivation internally if needed.
+ * Adds an entry to the list. If the list is full, -2 is returned, on any other error -1 is returned. Returns 1 if the item is added and 0 if it was already there.
  */
-int wallet_priv_key(const uint32_t path[WALLET_PATH_LEN], uint8_t out_priv[BIP32_KEY_COMPONENT_LEN]);
+int pinless_list_add(const uint32_t path[WALLET_PATH_LEN]);
 
 /**
- * Gets the address for the child wallet with the given path. Returns 0 on success, -1 on failure. Performs key derivation internally if needed.
+ * Removes an entry from the list. On error -1 is returned. Returns 1 if the item was removed from the list and 0 if it wasn't there in the first place.
  */
-int wallet_address(const uint32_t path[WALLET_PATH_LEN], uint8_t out_addr[WALLET_ADDR_LEN]);
+int pinless_list_remove(const uint32_t path[WALLET_PATH_LEN]);
 
-/**
- * Gets the address for the master wallet. Returns 0 on success, -1 on failure.
- */
-int wallet_master_address(uint8_t out_addr[WALLET_ADDR_LEN]);
-
-#endif /* WALLET_H_ */
+#endif /* PINLESS_LIST_H_ */

@@ -22,9 +22,6 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include <string.h>
-
 #include "wallet.h"
 #include "crypto.h"
 #include "fs.h"
@@ -102,7 +99,7 @@ static wallet_key_t* _wallet_closest_cache_entry(const uint32_t path[WALLET_PATH
       if (page[i] == 0xffffffff) {
         return res;
       } else if ((page[i] <= path[0]) && (page[i] > *found_level)) {
-        if (!memcmp(&page[i+1], &path[1], (page[i] * 4))) {
+        if (!wordcmp(&page[i+1], &path[1], page[i])) {
           *found_level = page[i];
           res = (wallet_key_t*)(&page[i + WALLET_PATH_LEN]);
 
