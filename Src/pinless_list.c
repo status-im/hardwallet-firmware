@@ -59,11 +59,14 @@ static uint32_t* _pinless_list_compact(int first_compactable_page) {
     }
   }
 
-  for(int i = swap_page; i < FS_PINLESS_LIST_COUNT; i++) {
-    memcpy(swap_header, fs_get_page(FS_PINLESS_LIST_PAGE, i), (FS_HEADER_SIZE * 4));
+  res = &fs_get_page(FS_PINLESS_LIST_PAGE, swap_page)[swap_i];
+
+  while(swap_page < FS_PINLESS_LIST_COUNT) {
+    memcpy(swap_header, fs_get_page(FS_PINLESS_LIST_PAGE, swap_page), (FS_HEADER_SIZE * 4));
     swap_header[1]++;
     if (fs_write_entry(swap, swap_header, FS_HEADER_SIZE)) return NULL;
-    swap = (i < FS_PINLESS_LIST_COUNT - 1) ? fs_swap_get_free() : NULL;
+    swap = (swap_page < FS_PINLESS_LIST_COUNT - 1) ? fs_swap_get_free() : NULL;
+    swap_page++;
   }
 
   return fs_commit() == -1 ? NULL : res;
@@ -75,22 +78,22 @@ static int _pinless_search(const uint32_t path[WALLET_PATH_LEN], uint32_t** out_
   for (int i = 0; i < FS_PINLESS_LIST_COUNT; i++) {
     uint32_t* page = fs_get_page(FS_PINLESS_LIST_PAGE, i);
 
-    for (int i = FS_HEADER_SIZE; i < FS_FLASH_PAGE_SIZE; i += WALLET_PATH_LEN) {
-      if (page[i] == 0xffffffff) {
+    for (int j = FS_HEADER_SIZE; j < FS_FLASH_PAGE_SIZE; j += WALLET_PATH_LEN) {
+      if (page[j] == 0xffffffff) {
         if (out_free) {
-          *out_free = &page[i];
+          *out_free = &page[j];
         }
 
         return found;
-      } else if (page[i] == 0x00000000) {
-        if (first_compactable_page && *first_compactable_page == -1) {
+      } else if (page[j] == 0x00000000) {
+        if (first_compactable_page && (*first_compactable_page == -1)) {
           *first_compactable_page = i;
         }
-      } else if (!found && !wordcmp(path, &page[i], WALLET_PATH_LEN)) {
+      } else if (!found && !wordcmp(path, &page[j], WALLET_PATH_LEN)) {
         found = 1;
 
         if (out_path) {
-          *out_path = &page[i];
+          *out_path = &page[j];
         }
 
         if (!out_free) {
