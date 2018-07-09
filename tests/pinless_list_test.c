@@ -42,6 +42,7 @@ void test_init() {
 
 int fs_commit() {
   fs_commit_called = 1;
+  memcpy(pages, swap, TEST_AREA_SIZE * 4);
   return 0;
 }
 
@@ -108,7 +109,13 @@ void test_pinless_list_add(void) {
   zero_page(&pages[FS_FLASH_PAGE_SIZE*2]);
 
   TEST_CHECK(pinless_list_add(&entries[10]) == 1);
+  TEST_CHECK(!memcmp(&pages[2], &entries[0], 40));
+  TEST_CHECK(!memcmp(&pages[12], new_entry, 40));
   TEST_CHECK(!memcmp(&pages[22], &entries[10], 40));
+  TEST_CHECK(pages[1] == 1);
+  TEST_CHECK(pages[FS_FLASH_PAGE_SIZE + 1] == 1);
+  TEST_CHECK(pages[FS_FLASH_PAGE_SIZE*2 + 1] == 1);
+
   TEST_CHECK(fs_write_entry_called > 3);
   TEST_CHECK(fs_commit_called == 1);
   TEST_CHECK(fs_swap_get_free_called == 3);
