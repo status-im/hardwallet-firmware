@@ -72,7 +72,7 @@ Currently the following status codes are defined
 This command is sent to initialize the device. The initialization is composed of several phase. Each phase is triggered by a separate command so instructions can be displayed on the client and it is possible to resume the initialization procedure if needed. Some phases are alternative to each other and depend on whether the device was already initialized or not and if you want to restore a seed from mnemonics. The initialization phases must be executed in the correct order and no step can be repeated twice (if execution was succesful)
 
 Phase 0:
-This step authorizes the initialization (by prompting for PIN) and erases all device data. This step is only necessary if the decide has been previously initialized.
+This step authorizes the initialization (by prompting for PIN) and erases all device data. This step is only necessary if the device has been previously initialized.
 
 Phase 1:
 During this phase the seed is generated and mnemonic are displayed to the user.
