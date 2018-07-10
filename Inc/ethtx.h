@@ -79,6 +79,6 @@ int eth_parse(EthTx *tx);
  * Additionally, it must be possible to increase the barrier pointer by 64 bytes. This will always happen because the
  * the empty r and s component as substituted by the signature.
  */
-int eth_sign(EthTx *tx, uint8_t *priv_key);
+int eth_sign(EthTx *tx, const uint8_t *priv_key);
 
 #endif /* ETHTX_H_ */

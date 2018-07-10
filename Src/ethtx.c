@@ -187,7 +187,7 @@ static void rlp_write_list_len(uint8_t *buf, int len) {
   }
 }
 
-int eth_sign(EthTx *tx, uint8_t *privkey) {
+int eth_sign(EthTx *tx, const uint8_t *privkey) {
   if (!tx->is_valid || tx->is_signed) return -1;
 
   int tx_len = tx->barrier - tx->buffer;
