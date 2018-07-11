@@ -75,18 +75,18 @@ Phase 0:
 This step authorizes the initialization (by prompting for PIN) and erases all device data. This step is only necessary if the device has been previously initialized.
 
 Phase 1:
+During this phase a PIN is generated and shown to the user. The PIN can be changed later after initialization finishes.
+
+Phase 2a:
 During this phase the seed is generated and mnemonic are displayed to the user.
 
-Phase 2:
-This is alternative to Phase 1. In this case the seed is not generated but the mnemonics are entered on the device
-
-Phase 3:
-During this phase a PIN is generated and shown to the user. The PIN can be changed later after initialization finishes.
+Phase 2b (encoded as 3):
+This is alternative to Phase 2a. In this case the seed is not generated but the mnemonics are entered on the device
 
 Phase 4:
 The master wallet is generated from the seed and its address is sent to the client. After this phase the wallet is initialized and the only possible transition is back to Phase 0.
 
-* Parameters: Initialization phase number on 1 byte. In phase 1 or 2 the length of the checksum of the mnemonic (between 4 and 8) on the next byte, which determines the length of the sentence in words. In phase 4 a 0-64 characters long passphrase to protect the seed. The length is encoded on the first byte.
+* Parameters: Initialization phase number on 1 byte. In phase 2a or 2b the length of the checksum of the mnemonic (between 4 and 8) on the next byte, which determines the length of the sentence in words. In phase 4 a 0-64 characters long passphrase to protect the seed. The length is encoded on the first byte.
 * Response: Status only on all phases except Phase 4. On phase 4 the address of the master wallet is sent.
 * Low battery execution: No
 

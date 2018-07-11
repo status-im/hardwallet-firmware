@@ -175,6 +175,14 @@ void test_wallet_new(void) {
   TEST_CHECK(wo[WALLET_MK_IDX + 32] == 0xffffffff);
 }
 
+void test_wallet_created(void) {
+  test_init();
+
+  TEST_CHECK(!wallet_created());
+  TEST_CHECK(!wallet_new(seed, 64));
+  TEST_CHECK(wallet_created() == 1);
+}
+
 void test_wallet_priv_key(void) {
   test_init();
   uint8_t priv[BIP32_KEY_COMPONENT_LEN];
@@ -249,6 +257,7 @@ void test_wallet_master_address(void) {
 
 TEST_LIST = {
    { "wallet_new", test_wallet_new },
+   { "wallet_created", test_wallet_created },
    { "wallet_priv_key", test_wallet_priv_key },
    { "wallet_address", test_wallet_address },
    { "wallet_master_address", test_wallet_master_address },

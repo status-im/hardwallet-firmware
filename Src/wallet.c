@@ -84,6 +84,11 @@ int wallet_new(const uint8_t* seed, int seed_len) {
   return fs_write_entry(mk, mk_data, WALLET_MK_SIZE);
 }
 
+inline int wallet_created() {
+  uint32_t* mk = _wallet_mk();
+  return mk[0] != 0xffffffff;
+}
+
 static wallet_key_t* _wallet_closest_cache_entry(const uint32_t path[WALLET_PATH_LEN], int* found_level) {
   *found_level = 0;
 

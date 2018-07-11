@@ -88,6 +88,11 @@ ret:
   return res;
 }
 
+inline int fs_initialized() {
+  uint32_t* wo_page = FS_PAGE_IDX_ADDR(FS_WRITE_ONCE_PAGE, 0);
+  return wo_page[0] == FS_V1_PAGE_ID(FS_WRITE_ONCE_ID, 0);
+}
+
 static int _fs_page_by_magic(uint32_t magic) {
   uint32_t idx = 0;
 

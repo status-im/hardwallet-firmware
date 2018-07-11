@@ -93,6 +93,16 @@ void test_fs_init(void) {
   }
 }
 
+void test_fs_initialized(void) {
+  flash_unlock();
+  flash_erase(FS_FIRST_PAGE, FS_PAGE_COUNT);
+  flash_lock();
+
+  TEST_CHECK(!fs_initialized());
+  TEST_CHECK(!fs_init());
+  TEST_CHECK(fs_initialized() == 1);
+}
+
 #define _fs_swap_header(page, swap) swap[0] = page[0]; swap[1] = (page[1] + 1)
 
 void test_fs_commit(void) {
@@ -344,6 +354,7 @@ void test_fs_cache_entry(void) {
 
 TEST_LIST = {
    { "fs_init", test_fs_init },
+   { "fs_initialized", test_fs_initialized },
    { "fs_commit", test_fs_commit },
    { "fs_get_page", test_fs_get_page },
    { "fs_find_free_entry", test_fs_find_free_entry },

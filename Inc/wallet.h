@@ -36,6 +36,11 @@
 int wallet_new(const uint8_t* seed, int seed_len);
 
 /**
+ * Returns 1 if the wallet has been created, 0 otherwise.
+ */
+int wallet_created();
+
+/**
  * Gets the private key for the child wallet with the given path. Returns 0 on success, -1 on failure. Performs key derivation internally if needed.
  */
 int wallet_priv_key(const uint32_t path[WALLET_PATH_LEN], uint8_t out_priv[BIP32_KEY_COMPONENT_LEN]);

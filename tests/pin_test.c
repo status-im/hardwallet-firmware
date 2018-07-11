@@ -128,6 +128,14 @@ void test_pin_set(void) {
   TEST_CHECK(!memcmp(pin_entry, pin, (PIN_ENTRY_SIZE * 4)));
 }
 
+void test_pin_is_set(void) {
+  test_init();
+
+  TEST_CHECK(!pin_is_set(pin_short));
+  TEST_CHECK(!pin_set(pin_min));
+  TEST_CHECK(pin_is_set(pin_short));
+}
+
 void test_pin_change(void) {
   test_init();
 
@@ -218,6 +226,7 @@ void test_pin_remaining_tries(void) {
 
 TEST_LIST = {
    { "pin_set", test_pin_set },
+   { "pin_is_set", test_pin_is_set },
    { "pin_change", test_pin_change },
    { "pin_verify", test_pin_verify },
    { "pin_is_verified", test_pin_is_verified },

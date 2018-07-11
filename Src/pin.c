@@ -63,7 +63,7 @@ int _pin_set(uint8_t* pin) {
 }
 
 int pin_set(uint8_t* pin) {
-  if (fs_find_last_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE)) return -1;
+  if (pin_is_set()) return -1;
 
   if (fs_find_last_entry(FS_COUNTERS_PAGE, FS_COUNTERS_COUNT, PIN_COUNTER_ENTRY_SIZE) == NULL) {
     uint32_t counters[PIN_COUNTER_ENTRY_SIZE] = { 0, 0 };
@@ -71,6 +71,10 @@ int pin_set(uint8_t* pin) {
   }
 
   return _pin_set(pin);
+}
+
+inline int pin_is_set() {
+  return fs_find_last_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE) != NULL;
 }
 
 int pin_change(uint8_t* old_pin, uint8_t* new_pin) {

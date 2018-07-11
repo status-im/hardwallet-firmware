@@ -68,6 +68,11 @@
 int fs_init();
 
 /**
+ * Returns 1 if the file system is initialized, 0 otherwise
+ */
+int fs_initialized();
+
+/**
  * Commits the changes from the swap pages to the filesystem
  */
 int fs_commit();
