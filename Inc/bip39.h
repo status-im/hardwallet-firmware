@@ -30,6 +30,11 @@
 #define BIP39_SEED_LEN 64
 #define BIP39_MAX_MNEMO 24
 
+#define BIP39_WORD_COUNT(cslen) (cslen * 3)
+#define BIP39_ENTROPY_LEN(cslen) (cslen * 4)
+
+#define BIP39_MAX_STRLEN (BIP39_MAX_MNEMO * 9)
+
 /**
  * Generates a random sequence of mnemonic according to the BIP39 standard. The cslen parameters is used to determine the number of mnemonic indexes to generate. Returns the number of generates indexes, -1 on error.
  */

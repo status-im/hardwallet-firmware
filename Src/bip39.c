@@ -34,12 +34,12 @@
 
 int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic) {
   if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
-  int entlen = cslen * 4;
-  uint8_t ent[(BIP39_MAX_CS_LEN * 4) + SHA_256_LEN];
+  int entlen = BIP39_ENTROPY_LEN(cslen);
+  uint8_t ent[BIP39_ENTROPY_LEN(BIP39_MAX_CS_LEN) + SHA_256_LEN];
   if (!rng(ent, entlen)) return -1;
   sha256(ent, entlen, &ent[entlen]);
 
-  int mlen = cslen * 3;
+  int mlen = BIP39_WORD_COUNT(cslen);
   int i, j, idx;
 
   for (i = 0; i < mlen; i++) {
@@ -82,9 +82,9 @@ int16_t bip39_find_word(const char* word) {
 
 int bip39_verify(int cslen, const uint16_t* mnemonic) {
   if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
-  uint8_t ent[(BIP39_MAX_CS_LEN * 4) + 1 + SHA_256_LEN];
-  int entlen = (cslen * 4);
-  int mlen = cslen * 3;
+  uint8_t ent[BIP39_ENTROPY_LEN(BIP39_MAX_CS_LEN) + 1 + SHA_256_LEN];
+  int entlen = BIP39_ENTROPY_LEN(cslen);
+  int mlen = BIP39_WORD_COUNT(cslen);
 
   int bi = 0;
   mem_clean(ent, entlen + 1);
