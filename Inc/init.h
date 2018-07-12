@@ -31,12 +31,12 @@
 /**
  * Must be called on boot to determine the initialization phase. Returns the current phase.
  */
-uint8_t init_boot();
+int init_boot();
 
 /**
  * Returns 1 if the device is ready for normal operation, 0 if it must be initialized.
  */
-uint8_t init_ready();
+int init_ready();
 
 /**
  * Performs phase 0 of device initialization. Refer to PROTOCOL.MD for details

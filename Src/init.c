@@ -35,7 +35,7 @@ static int init_phase = -1;
 static uint16_t mnemonic[BIP39_MAX_MNEMO];
 static int mnlen;
 
-uint8_t init_boot() {
+int init_boot() {
   if (!fs_initialized()) {
     init_phase = -1;
   } else if (!pin_is_set()) {
@@ -49,7 +49,7 @@ uint8_t init_boot() {
   return init_phase;
 }
 
-uint8_t init_ready() {
+int init_ready() {
   return init_phase == 4;
 }
 
