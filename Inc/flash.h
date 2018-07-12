@@ -44,6 +44,8 @@
 #define UPGRADE_FW_START FLASH_START_BANK2
 #define UPGRADE_FW_FIRST_PAGE 0
 
+#define FLASH_PAGE_ADDR(p) ((uint32_t*) (FLASH_START_BANK2 + (p * FLASH_PAGE_SIZE)))
+
 /**
  * Unlocks the flash, allowing writing.
  */
