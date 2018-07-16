@@ -29,27 +29,27 @@
 #include <stdbool.h>
 
 struct {
-  uint8_t *buffer;
-  uint8_t *barrier;
+  uint8_t* buffer;
+  uint8_t* barrier;
 
   int list_len;
-  uint8_t *list;
+  uint8_t* list;
 
-  uint8_t *dst_addr;
+  uint8_t* dst_addr;
 
   int value_len;
-  uint8_t *value;
+  uint8_t* value;
 
   int data_len;
-  uint8_t *data;
+  uint8_t* data;
 
-  uint8_t *v;
-  uint8_t *r;
-  uint8_t *s;
+  uint8_t* v;
+  uint8_t* r;
+  uint8_t* s;
 
   bool is_signed;
   bool is_valid;
-} typedef EthTx;
+} typedef eth_tx_t;
 
 /**
  * Takes an EthTx structure where the buffer and barrier fields must be populated and fills the other fields by parsing the content of the buffer.
@@ -57,7 +57,7 @@ struct {
  *
  * Only accepts unsigned transactions, where v is the chain id (for now on 1 byte only) and r and s are empty as per EIP-155
  */
-int eth_parse(EthTx *tx);
+int eth_parse(eth_tx_t* tx);
 
 /**
  * Signs a previously parsed transaction. The transaction is modified in place.
@@ -67,6 +67,6 @@ int eth_parse(EthTx *tx);
  * Additionally, it must be possible to increase the barrier pointer by 64 bytes. This will always happen because the
  * the empty r and s component as substituted by the signature.
  */
-int eth_sign(EthTx *tx, const uint8_t *priv_key);
+int eth_sign(eth_tx_t* tx, const uint8_t* priv_key);
 
 #endif /* ETH_H_ */

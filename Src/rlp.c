@@ -25,25 +25,25 @@
 #include <stddef.h>
 #include "rlp.h"
 
-static inline int rlp_1_byte_length(uint8_t *item, uint8_t **value) {
-  *value = &item[1];
+static inline int rlp_1_byte_length(const uint8_t* item, uint8_t** value) {
+  *value = (uint8_t*) &item[1];
   return item[0] & 0x3f;
 }
 
 // length can be up to 4 bytes
-static inline int rlp_x_bytes_length(uint8_t *item, uint8_t **value) {
+static inline int rlp_x_bytes_length(const uint8_t* item, uint8_t** value) {
   switch(item[0] & 0x3f) {
     case 0x38:
-      *value = &item[2];
+      *value = (uint8_t*) &item[2];
       return item[1];
     case 0x39:
-      *value = &item[3];
+      *value = (uint8_t*) &item[3];
       return (item[1] << 8) | item[2];
     case 0x3a:
-      *value = &item[4];
+      *value = (uint8_t*) &item[4];
       return (item[1] << 16) | (item[2] << 8) | item[3];
     case 0x3b:
-      *value = &item[5];
+      *value = (uint8_t*) &item[5];
       return (item[1] << 24) | (item[2] << 16) | (item[3] << 8) | item[4];
     default:
       *value = NULL;
@@ -51,11 +51,11 @@ static inline int rlp_x_bytes_length(uint8_t *item, uint8_t **value) {
   }
 }
 
-int rlp_parse(uint8_t *item, uint8_t **value, uint8_t **next, uint8_t *barrier) {
+int rlp_parse(const uint8_t* item, uint8_t** value, uint8_t** next, const uint8_t* barrier) {
   int len;
 
   if (item[0] < 0x80) {
-    *value = item;
+    *value = (uint8_t*) item;
     len = 1;
   } else if (item[0] < 0xb8) {
     len = rlp_1_byte_length(item, value);
@@ -84,6 +84,33 @@ int rlp_parse(uint8_t *item, uint8_t **value, uint8_t **next, uint8_t *barrier) 
   return len;
 }
 
+int rlp_read_uint32(const uint8_t* item, uint32_t* value, uint8_t** next, const uint8_t* barrier) {
+  uint8_t* v;
+
+  int len = rlp_parse(item, &v, next, barrier);
+
+  switch(len) {
+    case -1:
+      return -1;
+    case 0:
+      *value = 0;
+      break;
+    case 1:
+      *value = v[0];
+      break;
+    case 2:
+      *value = (v[0] << 8 | v[1]);
+      break;
+    case 3:
+      *value = (v[0] << 16 | (v[1] << 8) | v[2]);
+      break;
+      *value = (v[0] << 24 | (v[1] << 16) | (v[2] << 8) | v[3]);
+      break;
+  }
+
+  return 0;
+}
+
 int rlp_len_of_len(int len) {
   if (len < 56) {
     return 1;
@@ -100,7 +127,7 @@ int rlp_len_of_len(int len) {
   return -1;
 }
 
-void rlp_write_len(uint8_t *buf, int len, int is_list) {
+void rlp_write_len(uint8_t* buf, int len, int is_list) {
   uint8_t prefix;
 
   if (is_list) {

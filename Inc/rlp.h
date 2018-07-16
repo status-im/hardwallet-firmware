@@ -36,7 +36,12 @@
  *  the function will not fail but the next pointer will point to NULL, indicating that this was the last field.
  *
  **/
-int rlp_parse(uint8_t *item, uint8_t **value, uint8_t **next, uint8_t *barrier);
+int rlp_parse(const uint8_t* item, uint8_t** value, uint8_t** next, const uint8_t* barrier);
+
+/**
+ *  Takes an RLP item and reads its content as a big endian uint32. Returns -1 on failure, 0 otherwise.
+ */
+int rlp_read_uint32(const uint8_t* item, uint32_t* value, uint8_t** next, const uint8_t* barrier);
 
 /**
  * Returns the number of bytes needed to encode the given len.
@@ -46,6 +51,6 @@ int rlp_len_of_len(int len);
 /**
  * Writes the given length to the buffer. The is_list parameter encodes if the element is a list.
  */
-void rlp_write_len(uint8_t *buf, int len, int is_list);
+void rlp_write_len(uint8_t* buf, int len, int is_list);
 
 #endif /* RLP_H_ */

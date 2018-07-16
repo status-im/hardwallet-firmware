@@ -32,7 +32,7 @@
 #define ETH_ASSERT_NEXT(len, min, max, next) if (ETH_WRONG_LEN(len, min, max) || next == NULL) return -1;
 #define ETH_ASSERT_LAST(len, min, max, next) if (ETH_WRONG_LEN(len, min, max) || next != NULL) return -1;
 
-int eth_parse(EthTx *tx) {
+int eth_parse(eth_tx_t* tx) {
   if (tx->buffer == NULL || tx->barrier <= tx->buffer) {
     return -1;
   }
@@ -40,8 +40,8 @@ int eth_parse(EthTx *tx) {
   tx->is_signed = false;
   tx->is_valid = false;
 
-  uint8_t *value;
-  uint8_t *next;
+  uint8_t* value;
+  uint8_t* next;
   int len;
 
   // Enter the list
@@ -89,7 +89,7 @@ int eth_parse(EthTx *tx) {
   return 0;
 }
 
-int eth_sign(EthTx *tx, const uint8_t *privkey) {
+int eth_sign(eth_tx_t* tx, const uint8_t* privkey) {
   if (!tx->is_valid || tx->is_signed) return -1;
 
   int tx_len = tx->barrier - tx->buffer;

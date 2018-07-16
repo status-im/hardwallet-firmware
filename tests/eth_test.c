@@ -121,7 +121,7 @@ void test_rlp_parse(void) {
 }
 
 void test_eth_parse(void) {
-  EthTx tx;
+  eth_tx_t tx;
   tx.buffer = TX2;
   tx.barrier = &TX2[TX2_LEN];
 
@@ -174,7 +174,7 @@ void test_eth_parse(void) {
 }
 
 void test_eth_sign(void) {
-  EthTx tx;
+  eth_tx_t tx;
   tx.buffer = TX1;
   tx.barrier = &TX1[TX1_LEN];
 
