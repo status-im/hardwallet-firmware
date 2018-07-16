@@ -112,7 +112,7 @@ This command is issued to get the address of a wallet with the given key path. T
 
 ### Disable PIN
 
-Disables PIN entry for the given key path. The maximum key path depth is 9. When the PIN entry is disabled a simple yes/no confirmation will be required instead.
+Disables PIN entry for the given key path. The maximum key path depth is 9. When the PIN entry is disabled a simple yes/no confirmation will be required instead. PIN Authentication is required for this command.
 
 * Parameters: RLP encoded key path as list of numbers
 * Response: Only status code
@@ -120,7 +120,7 @@ Disables PIN entry for the given key path. The maximum key path depth is 9. When
 
 ### Enable PIN
 
-Enables PIN entry for the given key path. The maximum key path depth is 9. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds.
+Enables PIN entry for the given key path. The maximum key path depth is 9. This command only removes the given key path from the list of pinless paths. If the keypath was not in the list the command still succeeds. PIN Authentication is required for this command.
 
 * Parameters: RLP encoded key path as list of numbers
 * Response: Only status code

@@ -22,11 +22,10 @@
  * SOFTWARE.
  */
 
-#ifndef ETHTX_H_
-#define ETHTX_H_
+#ifndef ETH_H_
+#define ETH_H_
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdbool.h>
 
 struct {
@@ -53,17 +52,6 @@ struct {
 } typedef EthTx;
 
 /**
- *  Takes an RLP item, returns its length and stores the pointer to the value and to the next item in the given parameters.
- *  The barrier parameter is the address immediately after the transaction buffer. If parsing produces any address (value or next)
- *  which is larger than the barrier, parsing will fail. This is a protection against malformed data.
- *
- *  On failure this function returns -1 and. Value and next pointer will point to NULL. If the address of next is exactly the barrier, then
- *  the function will not fail but the next pointer will point to NULL, indicating that this was the last field.
- *
- **/
-int rlp_parse(uint8_t *item, uint8_t **value, uint8_t **next, uint8_t *barrier);
-
-/**
  * Takes an EthTx structure where the buffer and barrier fields must be populated and fills the other fields by parsing the content of the buffer.
  * On error, returns -1, on success returns 0.
  *
@@ -81,4 +69,4 @@ int eth_parse(EthTx *tx);
  */
 int eth_sign(EthTx *tx, const uint8_t *priv_key);
 
-#endif /* ETHTX_H_ */
+#endif /* ETH_H_ */
