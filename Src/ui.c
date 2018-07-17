@@ -28,6 +28,10 @@ err_t ui_authenticate_user() {
   return ERR_UNKNOWN;
 }
 
+err_t ui_confirm() {
+  return ERR_UNKNOWN;
+}
+
 err_t ui_display_mnemonic(const uint16_t* mnemonic, int mnlen) {
   return ERR_UNKNOWN;
 }
@@ -37,5 +41,13 @@ err_t ui_read_mnemonic(uint16_t* mnemonic, int mnlen) {
 }
 
 err_t ui_display_retry(void) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol) {
   return ERR_UNKNOWN;
 }

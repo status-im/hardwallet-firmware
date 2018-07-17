@@ -77,7 +77,7 @@ int fs_initialized() {
 }
 
 int pin_set(uint8_t* pin) {
-  TEST_CHECK(pin[0] == INIT_PIN_LEN);
+  TEST_CHECK(pin[0] == UI_PIN_LEN);
   TEST_CHECK(pin[1] == 0x32);
   TEST_CHECK(pin[2] == 0x35);
   TEST_CHECK(pin[3] == 0x34);
@@ -93,7 +93,7 @@ int pin_is_set() {
 }
 
 int rng(uint8_t* dst, unsigned int size) {
-  TEST_CHECK(size == INIT_PIN_LEN);
+  TEST_CHECK(size == UI_PIN_LEN);
   dst[0] = 0xd4;
   dst[1] = 0x05;
   dst[2] = 0x22;

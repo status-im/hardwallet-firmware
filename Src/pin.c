@@ -77,11 +77,9 @@ inline int pin_is_set() {
   return fs_find_last_entry(FS_PIN_DATA_PAGE, FS_PIN_DATA_COUNT, PIN_ENTRY_SIZE) != NULL;
 }
 
-int pin_change(uint8_t* old_pin, uint8_t* new_pin) {
-  int res = pin_verify(old_pin);
-  if (res != 1) return res;
-  res = _pin_set(new_pin);
-  return (res == -1) ? -1 : !res;
+int pin_change(uint8_t* new_pin) {
+  if (!pin_is_verified()) return -1;
+  return (_pin_set(new_pin) == -1) ? -1 : 1;
 }
 
 static int _pin_remaining_tries(uint32_t *out) {

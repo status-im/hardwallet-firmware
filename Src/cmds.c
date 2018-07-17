@@ -22,24 +22,143 @@
  * SOFTWARE.
  */
 
+#include <string.h>
 #include "cmds.h"
+#include "eth.h"
+#include "rlp.h"
+#include "ui.h"
+#include "pin.h"
+#include "pinless_list.h"
 
-err_t cmd_sign(const uint8_t* rlp_wallet_path, const uint8_t* eth_tx, uint8_t* out_sig) {
-  return ERR_UNKNOWN;
+static err_t cmd_path_decode(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint32_t wallet_path[WALLET_PATH_LEN], uint8_t** after_list) {
+  uint8_t* next;
+  uint8_t* value;
+
+  int list_len = rlp_parse(rlp_wallet_path, &value, &next, barrier);
+  if (list_len == -1) return ERR_INVALID_DATA;
+
+  if (after_list) *after_list = next;
+  const uint8_t* inner_barrier = next ? next : barrier;
+  next = list_len ? value : NULL;
+
+  wallet_path[0] = 0;
+
+  while(next) {
+    wallet_path[0]++;
+    if (wallet_path[0] > 9) return ERR_INVALID_DATA;
+    if (rlp_read_uint32(next, &wallet_path[wallet_path[0]], &next, inner_barrier) == -1) return ERR_INVALID_DATA;
+  }
+
+  return ERR_OK;
 }
 
-err_t cmd_get_address(const uint8_t* rlp_wallet_path, uint8_t addr[WALLET_ADDR_LEN]) {
-  return ERR_UNKNOWN;
+err_t cmd_sign(const uint8_t* rlp_data, const uint8_t* barrier, uint8_t** out_sig) {
+  eth_tx_t tx;
+  uint32_t wallet_path[WALLET_PATH_LEN];
+  err_t err = cmd_path_decode(rlp_data, barrier, wallet_path, &tx.buffer);
+  if (err != ERR_OK) return err;
+  if (wallet_path[0] == 0) return ERR_INVALID_DATA;
+
+  tx.barrier = barrier;
+  if (eth_parse(&tx)) return ERR_INVALID_DATA;
+
+  uint8_t src_addr[WALLET_ADDR_LEN];
+  if (wallet_address(wallet_path, src_addr)) return ERR_UNKNOWN;
+  err = ui_confirm_addr(UI_PROMPT_SRC_ADDR, src_addr);
+  if (err != ERR_OK) return err;
+
+  if (tx.erc20_idx != -1) {
+    err = ui_confirm_addr(UI_PROMPT_DST_ADDR, tx.dst_addr);
+    if (err != ERR_OK) return err;
+    err = ui_confirm_amount(tx.value, tx.value_len, "ETH");
+    if (err != ERR_OK) return err;
+  } else {
+    err = ui_confirm_addr(UI_PROMPT_DST_ADDR, &tx.data[16]);
+    if (err != ERR_OK) return err;
+    // implement ERC20 lookup
+    err = ui_confirm_amount(&tx.data[36], 32, "ERC");
+    if (err != ERR_OK) return err;
+  }
+
+  if (pinless_list_contains(wallet_path)) {
+    err = ui_confirm();
+  } else {
+    err = ui_authenticate_user();
+  }
+
+  if (err != ERR_OK) return err;
+
+  uint8_t priv_key[BIP32_KEY_COMPONENT_LEN];
+  if (wallet_priv_key(wallet_path, priv_key) == -1) return ERR_UNKNOWN;
+  if (eth_sign(&tx, priv_key) == -1) return ERR_UNKNOWN;
+
+  *out_sig = tx.v;
+  return err;
 }
 
-err_t cmd_disable_pin(const uint8_t* rlp_wallet_path) {
-  return ERR_UNKNOWN;
+err_t cmd_get_address(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint8_t addr[WALLET_ADDR_LEN]) {
+  uint32_t wallet_path[WALLET_PATH_LEN];
+  err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
+  if (err != ERR_OK) return err;
+
+  int e;
+  if (wallet_path[0]) {
+    e = wallet_address(wallet_path, addr);
+  } else {
+    e = wallet_master_address(addr);
+  }
+
+  return (e == -1) ? ERR_UNKNOWN : ERR_OK;
 }
 
-err_t cmd_enable_pin(const uint8_t* rlp_wallet_path) {
-  return ERR_UNKNOWN;
+err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
+  uint32_t wallet_path[WALLET_PATH_LEN];
+  err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
+  if (err != ERR_OK) return err;
+  if (wallet_path[0] == 0) return ERR_INVALID_DATA;
+
+  err = ui_authenticate_user();
+  if (err != ERR_OK) return err;
+
+  int e = pinless_list_add(wallet_path);
+
+  if (e == -2) {
+    return ERR_LIMIT_EXCEEDED;
+  } else {
+    return ERR_UNKNOWN;
+  }
+
+  return ERR_OK;
+}
+
+err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
+  uint32_t wallet_path[WALLET_PATH_LEN];
+  err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
+  if (err != ERR_OK) return err;
+
+  err = ui_authenticate_user();
+  if (err != ERR_OK) return err;
+
+  return (pinless_list_remove(wallet_path) == -1) ? ERR_UNKNOWN : ERR_OK;
 }
 
 err_t cmd_change_pin() {
-  return ERR_UNKNOWN;
+  pin_unverify();
+  err_t err = ui_authenticate_user();
+  if (err != ERR_OK) return err;
+
+  uint8_t new_pin[UI_PIN_LEN + 1];
+  uint8_t repeat_pin[UI_PIN_LEN + 1];
+  int retry = 0;
+
+  do {
+    if (retry) ui_display_retry();
+    err = ui_get_pin(UI_PROMPT_NEW_PIN, new_pin);
+    if (err != ERR_OK) return err;
+    err = ui_get_pin(UI_PROMPT_REPEAT_PIN, repeat_pin);
+    if (err != ERR_OK) return err;
+    retry = 1;
+  } while(memcmp(new_pin, repeat_pin, (UI_PIN_LEN+1)));
+
+  return (pin_change(new_pin) == -1) ? ERR_UNKNOWN : ERR_OK;
 }

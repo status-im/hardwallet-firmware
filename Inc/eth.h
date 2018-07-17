@@ -30,7 +30,7 @@
 
 struct {
   uint8_t* buffer;
-  uint8_t* barrier;
+  const uint8_t* barrier;
 
   int list_len;
   uint8_t* list;
@@ -49,6 +49,7 @@ struct {
 
   bool is_signed;
   bool is_valid;
+  int erc20_idx;
 } typedef eth_tx_t;
 
 /**
@@ -65,7 +66,7 @@ int eth_parse(eth_tx_t* tx);
  * length of the RLP list will increase and its encoded representation might be larger by one byte
  *
  * Additionally, it must be possible to increase the barrier pointer by 64 bytes. This will always happen because the
- * the empty r and s component as substituted by the signature.
+ * the empty r and s component are substituted by the signature.
  */
 int eth_sign(eth_tx_t* tx, const uint8_t* priv_key);
 

@@ -32,6 +32,11 @@
 #define ETH_ASSERT_NEXT(len, min, max, next) if (ETH_WRONG_LEN(len, min, max) || next == NULL) return -1;
 #define ETH_ASSERT_LAST(len, min, max, next) if (ETH_WRONG_LEN(len, min, max) || next != NULL) return -1;
 
+void eth_erc20_token(eth_tx_t* tx) {
+  //TODO: implement this, maybe a user updatable table?
+  tx->erc20_idx = 0;
+}
+
 int eth_parse(eth_tx_t* tx) {
   if (tx->buffer == NULL || tx->barrier <= tx->buffer) {
     return -1;
@@ -39,6 +44,7 @@ int eth_parse(eth_tx_t* tx) {
 
   tx->is_signed = false;
   tx->is_valid = false;
+  tx->erc20_idx = -1;
 
   uint8_t* value;
   uint8_t* next;
@@ -85,6 +91,10 @@ int eth_parse(eth_tx_t* tx) {
   ETH_ASSERT_LAST(len, 0, 0, next);
 
   tx->is_valid = true;
+
+  if ((tx->value_len == 0) && (tx->data_len == 68) && !memcmp(tx->data, "\xa9\x05\x9c\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00", 16)) {
+    eth_erc20_token(tx);
+  }
 
   return 0;
 }

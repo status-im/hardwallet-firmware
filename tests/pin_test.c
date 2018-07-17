@@ -139,17 +139,15 @@ void test_pin_is_set(void) {
 void test_pin_change(void) {
   test_init();
 
-  TEST_CHECK(pin_change(pin_max, pin_min) == -1);
-  TEST_CHECK(!pin_set(pin_max));
+  TEST_CHECK(pin_change(pin_min) == -1);
+  pin_set(pin_max);
 
-  TEST_CHECK(pin_change(pin_min, pin_min) == 0);
-  TEST_CHECK(pin_remaining_tries() == PIN_MAX_RETRIES - 1);
+  TEST_CHECK(pin_change(pin_min) == -1);
 
-  TEST_CHECK(pin_change(pin_max, pin_short) == -1);
-  TEST_CHECK(pin_is_verified());
+  pin_verify(pin_max);
+  TEST_CHECK(pin_change(pin_short) == -1);
 
-  TEST_CHECK(pin_change(pin_max, pin_min) == 1);
-  TEST_CHECK(pin_is_verified());
+  TEST_CHECK(pin_change(pin_min) == 1);
 }
 
 void test_pin_verify(void) {

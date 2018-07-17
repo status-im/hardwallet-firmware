@@ -41,9 +41,9 @@ int pin_set(uint8_t* pin);
 int pin_is_set();
 
 /**
- * Changes the PIN. Returns 0 if the old PIN could not be verified, 1 on success and -1 on failure.
+ * Changes the PIN. Returns 1 on success and -1 on failure or if the current PIN has not been verified in this session.
  */
-int pin_change(uint8_t* old_pin, uint8_t* new_pin);
+int pin_change(uint8_t* new_pin);
 
 /**
  * Verifies the PIN. Returns 0 if the old PIN could not be verified, 1 on success and -1 on failure. The pin_is_verified()

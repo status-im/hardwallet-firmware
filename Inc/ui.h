@@ -26,10 +26,23 @@
 #define UI_H_
 
 #include "err.h"
+#include "wallet.h"
+#include "pin.h"
+
+#define UI_PROMPT_SRC_ADDR 0
+#define UI_PROMPT_DST_ADDR 1
+#define UI_PROMPT_NEW_PIN 2
+#define UI_PROMPT_REPEAT_PIN 3
+
+#define UI_PIN_LEN 5
 
 err_t ui_authenticate_user();
+err_t ui_confirm();
 err_t ui_display_mnemonic(const uint16_t* mnemonic, int mnlen);
 err_t ui_read_mnemonic(uint16_t* mnemonic, int mnlen);
 err_t ui_display_retry(void);
+err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]);
+err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol);
+err_t ui_get_pin(int msg_id, uint8_t pin[UI_PIN_LEN]);
 
 #endif /* UI_H_ */

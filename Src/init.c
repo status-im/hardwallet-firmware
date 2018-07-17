@@ -29,8 +29,6 @@
 #include "pin.h"
 #include "bip39.h"
 
-#define INIT_PIN_LEN 5
-
 static int init_phase = -1;
 static uint16_t mnemonic[BIP39_MAX_MNEMO];
 static int mnlen;
@@ -69,11 +67,11 @@ err_t init_phase_0() {
 err_t init_phase_1() {
   if (init_phase != 0) return ERR_INVALID_DATA;
 
-  uint8_t pin[INIT_PIN_LEN+1];
-  pin[0] = INIT_PIN_LEN;
-  if (!rng(&pin[1], INIT_PIN_LEN)) return ERR_UNKNOWN;
+  uint8_t pin[UI_PIN_LEN + 1];
+  pin[0] = UI_PIN_LEN;
+  if (!rng(&pin[1], UI_PIN_LEN)) return ERR_UNKNOWN;
 
-  for (int i = 1; i <= INIT_PIN_LEN; i++) {
+  for (int i = 1; i <= UI_PIN_LEN; i++) {
     pin[i] = 0x30 + (pin[i] % 10);
   }
 

@@ -28,11 +28,11 @@
 #include "err.h"
 #include "wallet.h"
 
-err_t cmd_sign(const uint8_t* rlp_wallet_path, const uint8_t* eth_tx, uint8_t* out_sig);
-err_t cmd_get_address(const uint8_t* rlp_wallet_path, uint8_t addr[WALLET_ADDR_LEN]);
+err_t cmd_sign(const uint8_t* rlp_data, const uint8_t* barrier, uint8_t** out_sig);
+err_t cmd_get_address(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint8_t addr[WALLET_ADDR_LEN]);
 
-err_t cmd_disable_pin(const uint8_t* rlp_wallet_path);
-err_t cmd_enable_pin(const uint8_t* rlp_wallet_path);
+err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier);
+err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier);
 
 err_t cmd_change_pin();
 
