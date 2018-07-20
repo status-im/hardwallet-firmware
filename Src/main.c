@@ -23,7 +23,9 @@
  */
 
 #include "system.h"
+#include "init.h"
 
 int main() {
+  init_boot();
   for(;;);
 }

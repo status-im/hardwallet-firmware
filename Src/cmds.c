@@ -29,6 +29,7 @@
 #include "ui.h"
 #include "pin.h"
 #include "pinless_list.h"
+#include "init.h"
 
 static err_t cmd_path_decode(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint32_t wallet_path[WALLET_PATH_LEN], uint8_t** after_list) {
   uint8_t* next;
@@ -53,6 +54,8 @@ static err_t cmd_path_decode(const uint8_t* rlp_wallet_path, const uint8_t* barr
 }
 
 err_t cmd_sign(const uint8_t* rlp_data, const uint8_t* barrier, uint8_t** out_sig) {
+  if (!init_ready()) return ERR_UNINITIALIZED;
+
   eth_tx_t tx;
   uint32_t wallet_path[WALLET_PATH_LEN];
   err_t err = cmd_path_decode(rlp_data, barrier, wallet_path, &tx.buffer);
@@ -97,6 +100,8 @@ err_t cmd_sign(const uint8_t* rlp_data, const uint8_t* barrier, uint8_t** out_si
 }
 
 err_t cmd_get_address(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint8_t addr[WALLET_ADDR_LEN]) {
+  if (!init_ready()) return ERR_UNINITIALIZED;
+
   uint32_t wallet_path[WALLET_PATH_LEN];
   err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
   if (err != ERR_OK) return err;
@@ -112,6 +117,8 @@ err_t cmd_get_address(const uint8_t* rlp_wallet_path, const uint8_t* barrier, ui
 }
 
 err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
+  if (!init_ready()) return ERR_UNINITIALIZED;
+
   uint32_t wallet_path[WALLET_PATH_LEN];
   err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
   if (err != ERR_OK) return err;
@@ -132,6 +139,8 @@ err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
 }
 
 err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
+  if (!init_ready()) return ERR_UNINITIALIZED;
+
   uint32_t wallet_path[WALLET_PATH_LEN];
   err_t err = cmd_path_decode(rlp_wallet_path, barrier, wallet_path, NULL);
   if (err != ERR_OK) return err;
@@ -143,6 +152,8 @@ err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
 }
 
 err_t cmd_change_pin() {
+  if (!init_ready()) return ERR_UNINITIALIZED;
+
   pin_unverify();
   err_t err = ui_authenticate_user();
   if (err != ERR_OK) return err;
