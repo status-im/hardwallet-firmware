@@ -37,8 +37,11 @@ err_t fw_load(uint8_t page_num, uint16_t byte_len, const uint32_t* fw) {
 }
 
 err_t fw_upgrade() {
-  //TODO: find a way to call signature check from the bootloader...
-
-  system_reboot();
+  if (system_valid_firmware(UPGRADE_FW_START)) {
+    system_schedule_reboot();
+  } else {
+    flash_erase(UPGRADE_FW_FIRST_PAGE, FIRMWARE_PAGE_COUNT);
+    return ERR_INVALID_FW;
+  }
   return ERR_OK;
 }

@@ -76,11 +76,11 @@ defined in linker script */
 	.weak	Reset_Handler
 	.type	Reset_Handler, %function
 Reset_Handler:
-  ldr   sp, =_estack    /* Atollic update: set stack pointer */
-
-/* Copy the data segment initializers from flash to SRAM */
-  movs	r1, #0
-  b	LoopCopyDataInit
+    ldr   sp, =_estack    /* Atollic update: set stack pointer */
+    push {r0}
+   /* Copy the data segment initializers from flash to SRAM */
+   movs	r1, #0
+   b	LoopCopyDataInit
 
 CopyDataInit:
 	ldr	r3, =_sidata
@@ -107,7 +107,8 @@ LoopFillZerobss:
 	bcc	FillZerobss
 
 /* Call the clock system intitialization function.*/
-    bl  SystemInit
+    pop {r0}
+    bl  system_init
 /* Call static constructors */
     bl __libc_init_array
 /* Call the application's entry point.*/

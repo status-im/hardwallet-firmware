@@ -25,7 +25,11 @@
 #ifndef SYSTEM_H_
 #define SYSTEM_H_
 
+#include <stdint.h>
+
 int system_low_battery();
-void system_reboot();
+void system_schedule_reboot();
+int system_valid_firmware(uintptr_t addr);
+void system_init(const void* bl_service_table[]);
 
 #endif /* SYSTEM_H_ */
