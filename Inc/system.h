@@ -27,9 +27,24 @@
 
 #include <stdint.h>
 
+/**
+ * Returns 1 if the system detects low battery, 0 otherwise.
+ */
 int system_low_battery();
+
+/**
+ * Schedules a reboot. This will happen after processing all incoming commands and sending out responses.
+ */
 void system_schedule_reboot();
+
+/**
+ * Returns 1 if the firmware at the given address is valid, 0 otherwise. This functions invokes the bootloader to perform the actual check.
+ */
 int system_valid_firmware(uintptr_t addr);
+
+/**
+ * Called by the reset handler, initializes the clock and peripherals as well as storing the bootloader service table.
+ */
 void system_init(const void* bl_service_table[]);
 
 #endif /* SYSTEM_H_ */

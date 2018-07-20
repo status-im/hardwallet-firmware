@@ -45,7 +45,10 @@ void test_fw_load(void) {
   TEST_CHECK(fw_load(0, 2047, NULL) == ERR_INVALID_DATA);
   TEST_CHECK(flash_erase_called == 1);
   TEST_CHECK(flash_copy_called == 1);
-  fw_load(1, 2040, NULL);
+  TEST_CHECK(fw_load(0, 2056, NULL) == ERR_INVALID_DATA);
+  TEST_CHECK(flash_erase_called == 1);
+  TEST_CHECK(flash_copy_called == 1);
+  TEST_CHECK(fw_load(1, 2040, NULL) == ERR_OK);
   TEST_CHECK(flash_erase_called == 2);
   TEST_CHECK(flash_copy_called == 2);
 }

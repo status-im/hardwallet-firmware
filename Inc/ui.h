@@ -36,13 +36,44 @@
 
 #define UI_PIN_LEN 5
 
+/**
+ * Authenticates user by asking for a PIN. If the current session has been already authenticated, returns ERR_OK directly.
+ */
 err_t ui_authenticate_user();
+
+/**
+ * Asks the user to confirm an action
+ */
 err_t ui_confirm();
-err_t ui_display_mnemonic(const uint16_t* mnemonic, int mnlen);
-err_t ui_read_mnemonic(uint16_t* mnemonic, int mnlen);
+
+/**
+ * Display the mnemonic phrase, word by word.
+ */
+err_t ui_display_mnemonic(const uint16_t mnemonic[], int mnlen);
+
+/**
+ * Allows the user to input the mnemonic phrase word by word and stores the associated indexes in the given array.
+ */
+err_t ui_read_mnemonic(uint16_t mnemonic[], int mnlen);
+
+/**
+ * Display retry prompt to the user.
+ */
 err_t ui_display_retry(void);
+
+/**
+ * Prompt the user to confirm an ethereum address.
+ */
 err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]);
+
+/**
+ * Prompts the user to confirm an amount
+ */
 err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol);
+
+/**
+ * Gets a PIN by prompting the user to insert one.
+ */
 err_t ui_get_pin(int msg_id, uint8_t pin[UI_PIN_LEN]);
 
 #endif /* UI_H_ */

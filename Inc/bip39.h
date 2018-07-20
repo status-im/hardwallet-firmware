@@ -38,7 +38,7 @@
 /**
  * Generates a random sequence of mnemonic according to the BIP39 standard. The cslen parameters is used to determine the number of mnemonic indexes to generate. Returns the number of generates indexes, -1 on error.
  */
-int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic);
+int bip39_generate_mnemonic(int cslen, uint16_t mnemonic[]);
 
 /**
  * Returns the mnemonic index for the given word. Returns -1 if not found.
@@ -48,12 +48,12 @@ int16_t bip39_find_word(const char* word);
 /**
  * Verifies that this sequence of mnemonic is valid according to the BIP39 standard. The cslen parameters is used to determine the number of mnemonic indexes in the array.
  */
-int bip39_verify(int cslen, const uint16_t* mnemonic);
+int bip39_verify(int cslen, const uint16_t mnemonic[]);
 
 /**
  * Renders the array of indexes to a string of space separated words from which the seed can be generated.
  */
-void bip39_render_mnemonic(const uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen);
+void bip39_render_mnemonic(const uint16_t mnemonic[], int len, uint8_t* mnstr, int* mnlen);
 
 /**
  * Generates a binary seed from the given mnemonic string, protected by an optional passphrase long at most 64 bytes.

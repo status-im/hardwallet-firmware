@@ -27,7 +27,14 @@
 
 #include "err.h"
 
+/**
+ * Loads a page of the firmware. byte_len must be a multiple of 8 and must not exceed the page size.
+ */
 err_t fw_load(uint8_t page_num, uint16_t byte_len, const uint32_t* fw);
+
+/**
+ * Triggers a firmware upgrade by reboot the device. Before rebooting, the loaded firmware is verified. If it is invalid, ERR_INVALID_FW is returned. The firmware must have been loaded using the fw_load function.
+ */
 err_t fw_upgrade();
 
 #endif /* FW_H_ */

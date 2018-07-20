@@ -32,7 +32,7 @@
 #define BIP39_MIN_CS_LEN 4
 #define BIP39_MAX_CS_LEN 8
 
-int bip39_generate_mnemonic(int cslen, uint16_t* mnemonic) {
+int bip39_generate_mnemonic(int cslen, uint16_t mnemonic[]) {
   if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
   int entlen = BIP39_ENTROPY_LEN(cslen);
   uint8_t ent[BIP39_ENTROPY_LEN(BIP39_MAX_CS_LEN) + SHA_256_LEN];
@@ -80,7 +80,7 @@ int16_t bip39_find_word(const char* word) {
   return -1;
 }
 
-int bip39_verify(int cslen, const uint16_t* mnemonic) {
+int bip39_verify(int cslen, const uint16_t mnemonic[]) {
   if(cslen < BIP39_MIN_CS_LEN || cslen > BIP39_MAX_CS_LEN) return -1;
   uint8_t ent[BIP39_ENTROPY_LEN(BIP39_MAX_CS_LEN) + 1 + SHA_256_LEN];
   int entlen = BIP39_ENTROPY_LEN(cslen);
@@ -106,7 +106,7 @@ int bip39_verify(int cslen, const uint16_t* mnemonic) {
   return (ent[entlen] & mask) == (ent[entlen + 1] & mask) ? 0 : -1;
 }
 
-void bip39_render_mnemonic(const uint16_t* mnemonic, int len, uint8_t* mnstr, int* mnlen) {
+void bip39_render_mnemonic(const uint16_t mnemonic[], int len, uint8_t* mnstr, int* mnlen) {
   *mnlen = 0;
 
   for(int i = 0; i < len; i++) {

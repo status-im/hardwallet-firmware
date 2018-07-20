@@ -28,12 +28,38 @@
 #include "err.h"
 #include "wallet.h"
 
+/**
+ * Signs a transaction. The data must contain an RLP-encoded wallet path followed by the Ethereum transaction.
+ * The transaction is signed in place so the rlp_data buffer must be able to grow by at least 64 bytes.
+ * The out_sig pointer will point to the beginning of the signature.
+ *
+ * Requires PIN-authentication, unless PIN entry has been disabled for the given wallet.
+ *
+ * The master wallet cannot be used to sign transactions.
+ */
 err_t cmd_sign(const uint8_t* rlp_data, const uint8_t* barrier, uint8_t** out_sig);
+
+/**
+ * Gets the address of the wallet by the given path.
+ */
 err_t cmd_get_address(const uint8_t* rlp_wallet_path, const uint8_t* barrier, uint8_t addr[WALLET_ADDR_LEN]);
 
+/**
+ * Disables PIN-entry for the given wallet. The master wallet path (empty path) is considered to be invalid.
+ */
 err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier);
+
+/**
+ * Re-enables PIN-entry for the given wallet. Note that by default all wallets for which PIN-entry has not been
+ * explicitly disabled will require a PIN.
+ */
 err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier);
 
+/**
+ * Changes the device PIN. This happens by prompting the user to supply the current PIN and the new one.
+ * When changing PIN, the user will be prompted to insert the old PIN regardless of whether it has been
+ * verified in this session already.
+ */
 err_t cmd_change_pin();
 
 #endif /* CMDS_H_ */

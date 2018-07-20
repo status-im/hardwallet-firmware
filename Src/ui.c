@@ -32,11 +32,11 @@ err_t ui_confirm() {
   return ERR_UNKNOWN;
 }
 
-err_t ui_display_mnemonic(const uint16_t* mnemonic, int mnlen) {
+err_t ui_display_mnemonic(const uint16_t mnemonic[], int mnlen) {
   return ERR_UNKNOWN;
 }
 
-err_t ui_read_mnemonic(uint16_t* mnemonic, int mnlen) {
+err_t ui_read_mnemonic(uint16_t mnemonic[], int mnlen) {
   return ERR_UNKNOWN;
 }
 
