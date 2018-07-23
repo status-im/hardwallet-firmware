@@ -17,7 +17,7 @@ From the transport protocol point of view, both the client and server can initat
 
 The responsibility of the transport protocol is solely to handle transfer of segments and pass the reassembled APDU to the upper layer.
 
-When the application wants to transfer an APDU, it passes it to the transport layer which splits it in several segments and reassembles it on the receiver side. The first byte always contains the application-specific opcode and the segmentation info. The uppermost bit indicates if the segment is the first in the sequence. If this bit is set, any pending segment is discarded and this segment is treated as the first one. On subsequent segments this bit must be 0. The second uppermost bit indicates if the segment is the last one in the sequence. If this bit is set, the APDU is considered to be complete and is passed to the upper layer of the protocol stack. A segment can be the first and only segment if both bits are set. The opcode is carried in all segments and must match the current sequence. The first segment defines which opcode will be accepted. Segments carrying a different opcode will silently be rejected. After a reset or after a segment with the "last segment" indication has been received, only segments with the "first segment" indication will be accepted.
+When the application wants to transfer an APDU, it passes it to the transport layer which splits it in several segments and reassembles it on the receiver side. The first byte always contains the application-specific opcode and the segmentation info. The leftmost bit indicates if the segment is the first in the sequence. If this bit is set, any pending segment is discarded and this segment is treated as the first one. On subsequent segments this bit must be 0. The second leftmost bit indicates if the segment is the last one in the sequence. If this bit is set, the APDU is considered to be complete and is passed to the upper layer of the protocol stack. A segment can be the first and only segment if both bits are set. The opcode is carried in all segments and must match the current sequence. The first segment defines which opcode will be accepted. Segments carrying a different opcode will silently be rejected. After a reset or after a segment with the "last segment" indication has been received, only segments with the "first segment" indication will be accepted.
 
 The reassembled APDU will contain the opcode (without segmentation info) on the first byte.
 
@@ -51,7 +51,7 @@ Each command will be described in details later in the document
 
 ### Response
 
-All commands generate a response. The exact format of the response depends on the command, but the first byte always carries the opcode of the command which is being responded as well as the transport-level specific details as for the commands. The second byte of the response always carries the status code, coded on the lower 6 bits. The 2 uppermost bits are reserved for warning flags (possibly low battery indication).
+All commands generate a response. The exact format of the response depends on the command, but the first byte always carries the opcode of the command which is being responded as well as the transport-level specific details as for the commands. The second byte of the response always carries the status code, coded on the lower 6 bits. The 2 leftmost bits are reserved for warning flags
 
 Currently the following status codes are defined
 
@@ -66,6 +66,8 @@ Currently the following status codes are defined
 |  0x10  |   Invalid FW   | The loaded firmware is malformed or signature does not match  |
 |  0x20  |   Low battery  | Command refused because of low battery                        |
 |  0x3f  |  Unknown error | Unexpected system error                                       |
+
+the leftmost bit is a reserved warning flags. The second leftmost bit is the low battery warning.
 
 ### Initialize
 
@@ -142,7 +144,7 @@ Returns the current state of the device. This will include the initialization st
 
 Loads and writes to flash a page of firmware update. The data is not checked in any way and is simply written to the page specified by the command (relative to the firmware update area). The data length must be equal or less than the size of a physical page (2kb with the current chip). The page will always be fully programmed. If the data is shorter than the page, the missing bytes will be zeroed.
 
-* Parameters: page number on 1 byte, data length on 2 bytes (least significant byte first) followed by the actual data.
+* Parameters: page number on 1 byte, data length on 2 bytes (most significant byte first) followed by the actual data.
 * Response: Status code only
 * Low battery execution: No
 
