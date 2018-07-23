@@ -51,3 +51,7 @@ err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]) {
 err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol) {
   return ERR_UNKNOWN;
 }
+
+err_t ui_get_pin(int msg_id, uint8_t pin[UI_MAX_PIN_LEN]) {
+  return ERR_UNKNOWN;
+}

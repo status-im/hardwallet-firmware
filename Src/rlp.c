@@ -104,6 +104,7 @@ int rlp_read_uint32(const uint8_t* item, uint32_t* value, uint8_t** next, const 
     case 3:
       *value = (v[0] << 16 | (v[1] << 8) | v[2]);
       break;
+    case 4:
       *value = (v[0] << 24 | (v[1] << 16) | (v[2] << 8) | v[3]);
       break;
   }

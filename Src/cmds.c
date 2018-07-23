@@ -131,11 +131,11 @@ err_t cmd_disable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
 
   if (e == -2) {
     return ERR_LIMIT_EXCEEDED;
-  } else {
+  } else if (e == -1) {
     return ERR_UNKNOWN;
+  } else {
+    return ERR_OK;
   }
-
-  return ERR_OK;
 }
 
 err_t cmd_enable_pin(const uint8_t* rlp_wallet_path, const uint8_t* barrier) {
@@ -158,8 +158,8 @@ err_t cmd_change_pin() {
   err_t err = ui_authenticate_user();
   if (err != ERR_OK) return err;
 
-  uint8_t new_pin[UI_PIN_LEN + 1];
-  uint8_t repeat_pin[UI_PIN_LEN + 1];
+  uint8_t new_pin[UI_MAX_PIN_LEN + 1];
+  uint8_t repeat_pin[UI_MAX_PIN_LEN + 1];
   int retry = 0;
 
   do {
@@ -169,7 +169,7 @@ err_t cmd_change_pin() {
     err = ui_get_pin(UI_PROMPT_REPEAT_PIN, repeat_pin);
     if (err != ERR_OK) return err;
     retry = 1;
-  } while(memcmp(new_pin, repeat_pin, (UI_PIN_LEN+1)));
+  } while(new_pin[0] != repeat_pin[0] || memcmp(&new_pin[1], &repeat_pin[1], new_pin[0]));
 
   return (pin_change(new_pin) == -1) ? ERR_UNKNOWN : ERR_OK;
 }

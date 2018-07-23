@@ -34,7 +34,7 @@
 #define UI_PROMPT_NEW_PIN 2
 #define UI_PROMPT_REPEAT_PIN 3
 
-#define UI_PIN_LEN 5
+#define UI_MAX_PIN_LEN 5
 
 /**
  * Authenticates user by asking for a PIN. If the current session has been already authenticated, returns ERR_OK directly.
@@ -74,6 +74,6 @@ err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol);
 /**
  * Gets a PIN by prompting the user to insert one.
  */
-err_t ui_get_pin(int msg_id, uint8_t pin[UI_PIN_LEN]);
+err_t ui_get_pin(int msg_id, uint8_t pin[UI_MAX_PIN_LEN]);
 
 #endif /* UI_H_ */
