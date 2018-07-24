@@ -39,7 +39,7 @@
 #define APDU_OP_LOAD_FW 0x10
 #define APDU_OP_UPGRADE_FW 0x11
 
-static uint32_t* _apdu[APDU_BUFFER_SIZE/4]; // word alignment
+static uint32_t _apdu[APDU_BUFFER_SIZE/4]; // word alignment
 static uint8_t* apdu = (uint8_t*)_apdu;
 
 static int apdu_in_idx = 0;
