@@ -43,7 +43,7 @@ static uint32_t _apdu[APDU_BUFFER_SIZE/4]; // word alignment
 static uint8_t* apdu = (uint8_t*)_apdu;
 
 static int apdu_in_idx = 0;
-static int apdu_out_idx = 0;
+static int apdu_out_idx;
 static int apdu_cmd_len;
 static int apdu_resp_off;
 static int apdu_resp_len;
@@ -110,7 +110,9 @@ static err_t apdu_process_init() {
   return res;
 }
 
-int apdu_process() {
+apdu_status_t apdu_process() {
+  if (apdu_buffer_direction == 1 || apdu_cmd_len == 0) return APDU_STATUS_INVALID_SEGMENT;
+
   err_t res;
   apdu_resp_off = apdu_cmd_len - 1;
   apdu_resp_len = 1;
@@ -169,8 +171,9 @@ int apdu_process() {
   apdu[apdu_resp_off] = (low_battery | res);
   apdu_out_idx = 0;
   apdu_buffer_direction = 1;
+  apdu_cmd_len = 0;
 
-  return apdu_resp_len;
+  return APDU_STATUS_COMPLETE;
 }
 
 apdu_status_t apdu_send_segment(uint8_t* out, int len) {
