@@ -146,8 +146,6 @@ void test_cmd_sign(void) {
   TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_UNAUTHORIZED);
   test_ui_authenticate_user = ERR_OK;
   TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_OK);
-
-  TEST_CHECK(0);
 }
 
 void test_cmd_get_address(void) {
