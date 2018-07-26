@@ -10,11 +10,15 @@
 static int test_init_ready;
 
 static err_t test_ui_authenticate_user;
-static int test_pinless_list_add_remove;
+static int test_pinless_list_result;
 
 static uint8_t test_rlp_valid_path[] = { 0xc6, 0x04, 0x84, 0x80, 0x00, 0x00, 0x03 };
 static uint8_t test_rlp_master_path[] = { 0xc0 };
 static uint8_t test_rlp_too_long_path[] = { 0xca, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a };
+
+#define TEST_RLP_DATA_LEN 51
+uint8_t test_rlp_data[] = {0xc6,0x04,0x84,0x80,0x00,0x00,0x03,0xeb,0x02,0x85,0x02,0xef,0x04,0xbe,0x00,0x82,0x52,0x08,0x94,0xd2,0xc5,0xde,0x69,0xd9,0x65,0xcb,0xfd,0x87,0x1e,0x4f,0x1c,0x21,0x78,0x82,0x19,0x10,0x0f,0x7c,0xfc,0x87,0x81,0x57,0x4f,0xbe,0x28,0x00,0x00,0x80,0x01,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+
 
 static uint8_t test_wallet_addr[WALLET_ADDR_LEN];
 
@@ -26,7 +30,7 @@ int init_ready() {
 }
 
 int wallet_priv_key(const uint32_t path[WALLET_PATH_LEN], uint8_t out_priv[BIP32_KEY_COMPONENT_LEN]) {
-  return -1;
+  return 0;
 }
 
 int wallet_address(const uint32_t path[WALLET_PATH_LEN], uint8_t out_addr[WALLET_ADDR_LEN]) {
@@ -44,11 +48,14 @@ int wallet_master_address(uint8_t out_addr[WALLET_ADDR_LEN]) {
 }
 
 int eth_parse(eth_tx_t* tx) {
-  return -1;
+  TEST_CHECK(tx->buffer[0] == 0xeb);
+  TEST_CHECK(tx->barrier == &test_rlp_data[TEST_RLP_DATA_LEN]);
+  tx->v = &test_rlp_data[TEST_RLP_DATA_LEN - 3];
+  return 0;
 }
 
 int eth_sign(eth_tx_t* tx, const uint8_t* priv_key) {
-  return -1;
+  return 0;
 }
 
 int pin_change(uint8_t* new_pin) {
@@ -65,15 +72,15 @@ void pin_unverify() {
 }
 
 int pinless_list_contains(const uint32_t path[WALLET_PATH_LEN]) {
-  return -1;
+  return test_pinless_list_result;
 }
 
 int pinless_list_add(const uint32_t path[WALLET_PATH_LEN]) {
-  return test_pinless_list_add_remove;
+  return test_pinless_list_result;
 }
 
 int pinless_list_remove(const uint32_t path[WALLET_PATH_LEN]) {
-  return test_pinless_list_add_remove;
+  return test_pinless_list_result;
 }
 
 err_t ui_authenticate_user() {
@@ -81,7 +88,7 @@ err_t ui_authenticate_user() {
 }
 
 err_t ui_confirm() {
-  return ERR_UNKNOWN;
+  return ERR_OK;
 }
 
 err_t ui_display_retry(void) {
@@ -89,10 +96,10 @@ err_t ui_display_retry(void) {
 }
 
 err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]) {
-  return ERR_UNKNOWN;
+  return ERR_OK;
 }
 err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol) {
-  return ERR_UNKNOWN;
+  return ERR_OK;
 }
 
 err_t ui_get_pin(int msg_id, uint8_t pin[UI_MAX_PIN_LEN]) {
@@ -128,6 +135,18 @@ err_t ui_get_pin(int msg_id, uint8_t pin[UI_MAX_PIN_LEN]) {
 }
 
 void test_cmd_sign(void) {
+  test_init_ready = 0;
+  uint8_t* out_sig;
+  TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_UNINITIALIZED);
+  test_init_ready = 1;
+  test_pinless_list_result = 1;
+  test_ui_authenticate_user = ERR_UNAUTHORIZED;
+  TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_OK);
+  test_pinless_list_result = 0;
+  TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_UNAUTHORIZED);
+  test_ui_authenticate_user = ERR_OK;
+  TEST_CHECK(cmd_sign(test_rlp_data, &test_rlp_data[TEST_RLP_DATA_LEN], &out_sig) == ERR_OK);
+
   TEST_CHECK(0);
 }
 
@@ -150,11 +169,11 @@ void test_cmd_disable_pin(void) {
   TEST_CHECK(cmd_disable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_UNAUTHORIZED);
   test_ui_authenticate_user = ERR_OK;
   TEST_CHECK(cmd_disable_pin(test_rlp_master_path, &test_rlp_master_path[1]) == ERR_INVALID_DATA);
-  test_pinless_list_add_remove = 1;
+  test_pinless_list_result = 1;
   TEST_CHECK(cmd_disable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_OK);
-  test_pinless_list_add_remove = 0;
+  test_pinless_list_result = 0;
   TEST_CHECK(cmd_disable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_OK);
-  test_pinless_list_add_remove = -2;
+  test_pinless_list_result = -2;
   TEST_CHECK(cmd_disable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_LIMIT_EXCEEDED);
 }
 
@@ -165,9 +184,9 @@ void test_cmd_enable_pin(void) {
   test_ui_authenticate_user = ERR_UNAUTHORIZED;
   TEST_CHECK(cmd_enable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_UNAUTHORIZED);
   test_ui_authenticate_user = ERR_OK;
-  test_pinless_list_add_remove = 1;
+  test_pinless_list_result = 1;
   TEST_CHECK(cmd_enable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_OK);
-  test_pinless_list_add_remove = 0;
+  test_pinless_list_result = 0;
   TEST_CHECK(cmd_enable_pin(test_rlp_valid_path, &test_rlp_valid_path[7]) == ERR_OK);
 }
 
