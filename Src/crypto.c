@@ -23,13 +23,13 @@
  */
 
 #include "crypto.h"
-#include "cifra/sha2.h"
-#include "cifra/sha3.h"
-#include "cifra/hmac.h"
-#include "cifra/pbkdf2.h"
-#include "cifra/aes.h"
-#include "cifra/modes.h"
-#include "uecc/uECC.h"
+#include "../vendor/cifra/sha2.h"
+#include "../vendor/cifra/sha3.h"
+#include "../vendor/cifra/hmac.h"
+#include "../vendor/cifra/pbkdf2.h"
+#include "../vendor/cifra/aes.h"
+#include "../vendor/cifra/modes.h"
+#include "../vendor/uecc/uECC.h"
 
 #if defined(__arm__)
 #include "stm32l4xx.h"

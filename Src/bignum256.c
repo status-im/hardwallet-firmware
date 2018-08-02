@@ -23,7 +23,7 @@
  */
 
 #include "bignum256.h"
-#include "uecc/uECC_vli.h"
+#include "../vendor/uecc/uECC_vli.h"
 
 struct bignum256 {
   uECC_word_t _v[BIGNUM_WORDS];
