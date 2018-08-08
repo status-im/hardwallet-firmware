@@ -17,7 +17,6 @@
 #define __GP_TIMER_H__
 
 #include <stdint.h>
-#include "ble_status.h"
 
 
 /**

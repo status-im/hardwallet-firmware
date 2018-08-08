@@ -41,26 +41,9 @@
 #ifndef __STM32L4XX_NUCLEO_BLUENRG_H
 #define __STM32L4XX_NUCLEO_BLUENRG_H
 
-/** @addtogroup BSP
-  * @{
-  */ 
+#include "stm32l4xx.h"
+#include "stm32_gpio.h"
 
-/** @addtogroup STM32L4XX_NUCLEO
-  * @{
-  */
-  
-/** @defgroup STM32L4XX_NUCLEO_BLUENRG
-  * @{
-  */
-  
-/** @defgroup STM32L4XX_NUCLEO_BLUENRG_Exported_Defines 
-  * @{
-  */
-  
-/**
-* @brief SPI communication details between Nucleo L4 and BlueNRG
-*        Expansion Board.
-*/
 // SPI Instance
 #define BNRG_SPI_INSTANCE		SPI1
 #define BNRG_SPI_CLK_ENABLE()		__SPI1_CLK_ENABLE()
@@ -143,35 +126,6 @@
    
 #define BNRG_SPI_FORCE_RESET()          __SPI1_FORCE_RESET()
 #define BNRG_SPI_RELEASE_RESET()        __SPI1_RELEASE_RESET()
-   
-//#define BNRG_DMA_CLK_ENABLE()           __DMA1_CLK_ENABLE()
-/* Definition for SPIx's DMA */
-//#define BNRG_SPI_TX_DMA_CHANNEL         DMA1_Channel3
-//#define BNRG_SPI_TX_DMA_REQUEST         DMA_REQUEST_1
-//#define BNRG_SPI_TX_DMA_TC_FLAG         DMA_FLAG_TC3
-//#define BNRG_SPI_RX_DMA_CHANNEL         DMA1_Channel2
-//#define BNRG_SPI_RX_DMA_REQUEST         DMA_REQUEST_1
-//#define BNRG_SPI_RX_DMA_TC_FLAG         DMA_FLAG_TC2
-/* Definition for SPIx's NVIC */
-//#define BNRG_SPI_DMA_TX_IRQn            DMA1_Channel3_IRQn
-//#define BNRG_SPI_DMA_RX_IRQn            DMA1_Channel2_IRQn
-
-//EXTI External Interrupt for user button
-#define PUSH_BUTTON_EXTI_IRQHandler     EXTI15_10_IRQHandler
-
-/**
-  * @}
-  */ 
-
-/** @defgroup STM32L4XX_NUCLEO_BLUENRG_Exported_Functions
-  * @{
-  */
-  
-void Enable_SPI_IRQ(void);
-void Disable_SPI_IRQ(void);
-void Clear_SPI_IRQ(void);
-void Clear_SPI_EXTI_Flag(void);
-
 
 #endif /* __STM32L4XX_NUCLEO_BLUENRG_H */
 

@@ -25,7 +25,15 @@
 #include "system.h"
 #include "init.h"
 
+#include "bluenrg_itf.h"
+
+void ble_init() {
+  BNRG_SPI_Init();
+  BlueNRG_RST();
+}
+
 int main() {
   init_boot();
+  ble_init();
   for(;;);
 }

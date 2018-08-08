@@ -21,7 +21,6 @@
 #include "ble_status.h"
 #include "hal.h"
 #include "hci_const.h"
-#include "gp_timer.h"
 
 #include "bluenrg_itf.h"
 
