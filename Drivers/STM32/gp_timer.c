@@ -132,3 +132,7 @@ Timer_Remaining(struct timer *t)
   return t->start + t->interval - Clock_Time();
 }
 
+void HAL_Delay(uint32_t ms) {
+
+}
+

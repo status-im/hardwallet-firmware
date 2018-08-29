@@ -26,13 +26,8 @@
  *
  */
 struct timer {
-    
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-    
   uint32_t start;
   uint32_t interval;
-  
-#endif
 };
 
 typedef void (* TIMER_HCI_TIMEOUT_NOTIFY_CALLBACK_TYPE)(void);
@@ -90,6 +85,8 @@ int Timer_Expired(struct timer *t);
  * @return  Time before timer's expiration.
  */
 uint32_t Timer_Remaining(struct timer *t);
+
+void HAL_Delay(uint32_t ms);
 
 
 #endif /* __GP_TIMER_H__ */

@@ -30,35 +30,18 @@
 #define TIMEOUT_DURATION 15
 #define CLOCK_SECOND 1000
 
-static void HAL_Delay(uint32_t ms) {
-
-}
+SPI_HandleTypeDef SpiHandle;
 
 static void set_irq_as_output(void) {
- /* GPIO_InitTypeDef  GPIO_InitStructure;*/
-
   /* Pull IRQ high */
-  /*GPIO_InitStructure.Pin = BNRG_SPI_IRQ_PIN;
-  GPIO_InitStructure.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStructure.Speed = BNRG_SPI_IRQ_SPEED;
-  GPIO_InitStructure.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, &GPIO_InitStructure);
-  HAL_GPIO_WritePin(BNRG_SPI_IRQ_PORT, BNRG_SPI_IRQ_PIN, GPIO_PIN_SET);*/
+  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, BNRG_SPI_IRQ_PIN, GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, BNRG_SPI_IRQ_SPEED, BNRG_SPI_IRQ_ALTERNATE);
+  HAL_GPIO_WritePin(BNRG_SPI_IRQ_PORT, BNRG_SPI_IRQ_PIN, GPIO_PIN_SET);
 }
 
 static void set_irq_as_input(void) {
-  /*GPIO_InitTypeDef  GPIO_InitStructure;*/
-
   /* IRQ input */
-  /*GPIO_InitStructure.Pin = BNRG_SPI_IRQ_PIN;
-  GPIO_InitStructure.Mode = BNRG_SPI_IRQ_MODE;
-  GPIO_InitStructure.Pull = GPIO_PULLDOWN;
-  GPIO_InitStructure.Speed = BNRG_SPI_IRQ_SPEED;
-  GPIO_InitStructure.Alternate = BNRG_SPI_IRQ_ALTERNATE;
-  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, &GPIO_InitStructure);
-
-  GPIO_InitStructure.Pull = BNRG_SPI_IRQ_PULL;
-  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, &GPIO_InitStructure);*/
+  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, BNRG_SPI_IRQ_PIN, BNRG_SPI_IRQ_MODE, GPIO_PULLDOWN, BNRG_SPI_IRQ_SPEED, BNRG_SPI_IRQ_ALTERNATE);
+  HAL_GPIO_Init(BNRG_SPI_IRQ_PORT, BNRG_SPI_IRQ_PIN, BNRG_SPI_IRQ_MODE, BNRG_SPI_IRQ_PULL, BNRG_SPI_IRQ_SPEED, BNRG_SPI_IRQ_ALTERNATE);
 }
 
 
@@ -76,7 +59,7 @@ void Hal_Write_Serial(const void* data1, const void* data2, int32_t n_bytes1, in
 }
 
 void BNRG_SPI_Init(void) {
-/*  SpiHandle.Instance = BNRG_SPI_INSTANCE;
+  SpiHandle.Instance = BNRG_SPI_INSTANCE;
   SpiHandle.Init.Mode = BNRG_SPI_MODE;
   SpiHandle.Init.Direction = BNRG_SPI_DIRECTION;
   SpiHandle.Init.DataSize = BNRG_SPI_DATASIZE;
@@ -89,7 +72,7 @@ void BNRG_SPI_Init(void) {
   SpiHandle.Init.BaudRatePrescaler = BNRG_SPI_BAUDRATEPRESCALER;
   SpiHandle.Init.CRCCalculation = BNRG_SPI_CRCCALCULATION;
 
-  HAL_SPI_Init(&SpiHandle);*/
+  HAL_SPI_Init(&SpiHandle);
 }
 
 
@@ -113,7 +96,6 @@ void BlueNRG_HW_Bootloader(void) {
 }
 
 int32_t BlueNRG_SPI_Read_All(uint8_t *buffer, uint8_t buff_size) {
-#if 0
   uint16_t byte_count;
   uint8_t len = 0;
   uint8_t char_ff = 0xff;
@@ -154,11 +136,9 @@ int32_t BlueNRG_SPI_Read_All(uint8_t *buffer, uint8_t buff_size) {
   for(volatile int i = 0; i < 2; i++)__NOP();
 
   return len;
-#endif
 }
 
 int32_t BlueNRG_SPI_Write(uint8_t* data1, uint8_t* data2, uint8_t Nb_bytes1, uint8_t Nb_bytes2) {
-#if 0
   int32_t result = 0;
 
   unsigned char header_master[HEADER_SIZE] = {0x0a, 0x00, 0x00, 0x00, 0x00};
@@ -201,7 +181,6 @@ int32_t BlueNRG_SPI_Write(uint8_t* data1, uint8_t* data2, uint8_t Nb_bytes1, uin
   Enable_SPI_IRQ();
 
   return result;
-#endif
 }
 
 void Enable_SPI_IRQ(void) {
