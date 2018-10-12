@@ -16,6 +16,8 @@
 #ifndef __BLUENRG_HAL_ACI_H__
 #define __BLUENRG_HAL_ACI_H__
 
+#include "compiler.h"
+
 /** @addtogroup Middlewares
  *  @{
  */

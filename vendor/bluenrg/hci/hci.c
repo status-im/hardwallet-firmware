@@ -91,11 +91,6 @@ int HCI_verify(const tHciDataPacket * hciReadPacket)
   return 0;      
 }
 
-__attribute__((weak)) void HCI_Event_CB(void *pckt)
-{
-	
-}
-
 void HCI_Process(void)
 {
   tHciDataPacket * hciReadPacket = NULL;

@@ -24,7 +24,7 @@
 
 #include "stm32l4xx.h"
 #include "system.h"
-#include "hci.h"
+#include "ble.h"
 
 #define BL_CHECK_FIRMWARE_SERVICE 0
 
@@ -66,5 +66,5 @@ void system_init(const void* bl_service_table[]) {
 
 
 void EXTI0_IRQHandler(void) {
-  HCI_Isr();
+  ble_isr();
 }
