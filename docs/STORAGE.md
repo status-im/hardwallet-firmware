@@ -5,9 +5,9 @@ The device has a dedicated area for storing data, which is 1/4 of the total devi
 The device uses flash storage, which is not byte-programmable so we must keep in mind the following properties:
 
 1. The minimum amount of data that can be written at once is a double-word (64 bits)
-2. The size of a flash page is 2k
+2. The size of a flash page is 4k
 3. Data cannot be rewritten once programmed, but can be zeroed in double-word chunks
-4. Flash pages can only be erased as a whole block (2k at once), this is the only way to reprogram
+4. Flash pages can only be erased as a whole block (4k at once), this is the only way to reprogram
 
 Frequent erase cycles shorten the lifespan of the memory. Furthermore, writing a page is not an atomic operation, so if part of the data being erased is important, a backup on a second page must happen first.
 
