@@ -22,15 +22,11 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef BLE_H_
+#define BLE_H_
 
-int main() {
-  init_boot();
-  ble_init();
+void ble_init();
+void ble_process();
+void ble_isr();
 
-  for(;;) {
-    ble_process();
-  }
-}
+#endif /* BLE_H_ */

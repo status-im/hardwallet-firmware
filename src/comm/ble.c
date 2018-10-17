@@ -22,15 +22,15 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#include <stdint.h>
+#include "comm/ble.h"
 
-int main() {
-  init_boot();
-  ble_init();
+const uint8_t BLE_DEVICE_NAME[] = {'S', 't', 'a', 't', 'u', 's', ' ', 'H', 'a', 'r', 'd', 'w', 'a', 'r', 'e', ' ', 'W', 'a', 'l', 'l', 'e', 't', ' ', 'P', 'r', 'o'};
 
-  for(;;) {
-    ble_process();
-  }
+void ble_init() {
+
+}
+
+void ble_process() {
+
 }

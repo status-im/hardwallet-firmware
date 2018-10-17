@@ -22,15 +22,36 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#include "app/ui.h"
 
-int main() {
-  init_boot();
-  ble_init();
+err_t ui_authenticate_user() {
+  return ERR_UNKNOWN;
+}
 
-  for(;;) {
-    ble_process();
-  }
+err_t ui_confirm() {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_display_mnemonic(const uint16_t mnemonic[], int mnlen) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_read_mnemonic(uint16_t mnemonic[], int mnlen) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_display_retry(void) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_confirm_addr(int msg_id, uint8_t addr[WALLET_ADDR_LEN]) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_confirm_amount(uint8_t* amount, int amount_len, const char* symbol) {
+  return ERR_UNKNOWN;
+}
+
+err_t ui_get_pin(int msg_id, uint8_t pin[UI_MAX_PIN_LEN]) {
+  return ERR_UNKNOWN;
 }

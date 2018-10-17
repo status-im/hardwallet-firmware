@@ -22,15 +22,33 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#include "app/system.h"
+#include "app_error.h"
+#include "storage/flash.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_crypto.h"
 
-int main() {
-  init_boot();
-  ble_init();
-
-  for(;;) {
-    ble_process();
-  }
+//TODO: implement this
+int system_low_battery() {
+  return -1;
 }
+
+//TODO: implement this
+void system_schedule_reboot() {
+  
+}
+
+//TODO: implement this
+int system_valid_firmware(uintptr_t addr) {
+  return 0;
+}
+
+void system_init() {
+  NRF_LOG_INIT(NULL);
+
+  ret_code_t rc = nrf_crypto_init();
+  APP_ERROR_CHECK(rc);
+
+  _nrf52_flash_init();
+}
+

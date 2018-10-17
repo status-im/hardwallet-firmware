@@ -22,15 +22,37 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef WALLET_H_
+#define WALLET_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include "wallet/bip32.h"
 
-  for(;;) {
-    ble_process();
-  }
-}
+#define WALLET_PATH_LEN 10
+#define WALLET_ADDR_LEN 20
+
+/**
+ * Creates a new BIP32-compatible wallet starting from the given seed. If a wallet already exist or if an error is encountered when generating the wallet, -1 is returned. Returns 0 on success.
+ */
+int wallet_new(const uint8_t* seed, int seed_len);
+
+/**
+ * Returns 1 if the wallet has been created, 0 otherwise.
+ */
+int wallet_created();
+
+/**
+ * Gets the private key for the child wallet with the given path. Returns 0 on success, -1 on failure. Performs key derivation internally if needed.
+ */
+int wallet_priv_key(const uint32_t path[WALLET_PATH_LEN], uint8_t out_priv[BIP32_KEY_COMPONENT_LEN]);
+
+/**
+ * Gets the address for the child wallet with the given path. Returns 0 on success, -1 on failure. Performs key derivation internally if needed.
+ */
+int wallet_address(const uint32_t path[WALLET_PATH_LEN], uint8_t out_addr[WALLET_ADDR_LEN]);
+
+/**
+ * Gets the address for the master wallet. Returns 0 on success, -1 on failure.
+ */
+int wallet_master_address(uint8_t out_addr[WALLET_ADDR_LEN]);
+
+#endif /* WALLET_H_ */

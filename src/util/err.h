@@ -22,15 +22,24 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef ERR_H_
+#define ERR_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include <stdint.h>
 
-  for(;;) {
-    ble_process();
-  }
-}
+typedef uint8_t err_t;
+
+#define ERR_OK 0x00
+#define ERR_UNAUTHORIZED 0x01
+#define ERR_USER_CANCELLED 0x02
+#define ERR_INVALID_DATA 0x03
+#define ERR_UNINITIALIZED 0x04
+#define ERR_LIMIT_EXCEEDED 0x05
+
+#define ERR_INVALID_FW 0x10
+
+#define ERR_LOW_BATTERY 0x20
+
+#define ERR_UNKNOWN 0x3f
+
+#endif /* ERR_H_ */

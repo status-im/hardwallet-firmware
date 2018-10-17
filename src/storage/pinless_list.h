@@ -22,15 +22,24 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef PINLESS_LIST_H_
+#define PINLESS_LIST_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include "wallet/wallet.h"
 
-  for(;;) {
-    ble_process();
-  }
-}
+/**
+ * Returns 1 if the list contains the given path, 0 otherwise.
+ */
+int pinless_list_contains(const uint32_t path[WALLET_PATH_LEN]);
+
+/**
+ * Adds an entry to the list. If the list is full, -2 is returned, on any other error -1 is returned. Returns 1 if the item is added and 0 if it was already there.
+ */
+int pinless_list_add(const uint32_t path[WALLET_PATH_LEN]);
+
+/**
+ * Removes an entry from the list. On error -1 is returned. Returns 1 if the item was removed from the list and 0 if it wasn't there in the first place.
+ */
+int pinless_list_remove(const uint32_t path[WALLET_PATH_LEN]);
+
+#endif /* PINLESS_LIST_H_ */

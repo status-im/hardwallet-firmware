@@ -22,15 +22,45 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef INIT_H_
+#define INIT_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include "wallet/wallet.h"
+#include "util/err.h"
 
-  for(;;) {
-    ble_process();
-  }
-}
+/**
+ * Must be called on boot to determine the initialization phase. Returns the current phase.
+ */
+int init_boot();
+
+/**
+ * Returns 1 if the device is ready for normal operation, 0 if it must be initialized.
+ */
+int init_ready();
+
+/**
+ * Performs phase 0 of device initialization. Refer to PROTOCOL.MD for details
+ */
+err_t init_phase_0();
+
+/**
+ * Performs phase 1 of device initialization. Refer to PROTOCOL.MD for details
+ */
+err_t init_phase_1();
+
+/**
+ * Performs phase 2a of device initialization. Refer to PROTOCOL.MD for details
+ */
+err_t init_phase_2a(uint8_t cslen);
+
+/**
+ * Performs phase 2b of device initialization. Refer to PROTOCOL.MD for details
+ */
+err_t init_phase_2b(uint8_t cslen);
+
+/**
+ * Performs phase 4 of device initialization. Refer to PROTOCOL.MD for details
+ */
+err_t init_phase_4(const uint8_t* passphrase, uint8_t pplen, uint8_t addr[WALLET_ADDR_LEN]);
+
+#endif /* INIT_H_ */

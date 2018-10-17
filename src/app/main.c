@@ -22,11 +22,12 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#include "app/system.h"
+#include "storage/init.h"
+#include "comm/ble.h"
 
 int main() {
+  system_init();
   init_boot();
   ble_init();
 

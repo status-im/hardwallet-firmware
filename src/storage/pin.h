@@ -22,15 +22,48 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef PIN_H_
+#define PIN_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include <stdint.h>
 
-  for(;;) {
-    ble_process();
-  }
-}
+#define PIN_MIN_LEN 4
+#define PIN_MAX_LEN 15
+
+/**
+ * Sets the PIN. Returns 0 on success, -1 on failure. Only works if no PIN is currently set.
+ */
+int pin_set(uint8_t* pin);
+
+/**
+ * Returns 1 if a PIN is set, 0 otherwise.
+ */
+int pin_is_set();
+
+/**
+ * Changes the PIN. Returns 1 on success and -1 on failure or if the current PIN has not been verified in this session.
+ */
+int pin_change(uint8_t* new_pin);
+
+/**
+ * Verifies the PIN. Returns 0 if the old PIN could not be verified, 1 on success and -1 on failure. The pin_is_verified()
+ * function will always return 0 after a failed verification attempt, even if the PIN was successfully verified before.
+ */
+int pin_verify(uint8_t* pin);
+
+/**
+ * Returns 1 if the PIN has been verified in the current session. Returns 0 otherwise
+ */
+int pin_is_verified();
+
+/**
+ * Resets the PIN verification status.
+ */
+void pin_unverify();
+
+/**
+ * Returns the number of remaining retries. Returns -1 in case of internal error.
+ */
+int pin_remaining_tries();
+
+#endif /* PIN_H_ */

@@ -22,15 +22,29 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef SYSTEM_H_
+#define SYSTEM_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include <stdint.h>
 
-  for(;;) {
-    ble_process();
-  }
-}
+/**
+ * Returns 1 if the system detects low battery, 0 otherwise.
+ */
+int system_low_battery();
+
+/**
+ * Schedules a reboot. This will happen after processing all incoming commands and sending out responses.
+ */
+void system_schedule_reboot();
+
+/**
+ * Returns 1 if the firmware at the given address is valid, 0 otherwise. This functions invokes the bootloader to perform the actual check.
+ */
+int system_valid_firmware(uintptr_t addr);
+
+/**
+ * Initializes platform-specific stuff.
+ */
+void system_init();
+
+#endif /* SYSTEM_H_ */

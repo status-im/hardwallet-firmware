@@ -22,15 +22,26 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#include "storage/fw.h"
+#include "storage/flash.h"
+#include "app/system.h"
 
-int main() {
-  init_boot();
-  ble_init();
+err_t fw_load(uint8_t page_num, uint16_t byte_len, const uint32_t* fw) {
+  if ((page_num < UPGRADE_FW_FIRST_PAGE) || (page_num > (UPGRADE_FW_FIRST_PAGE + FIRMWARE_PAGE_COUNT))) return ERR_INVALID_DATA;
+  if ((byte_len > FLASH_PAGE_SIZE) || (byte_len % 8)) return ERR_INVALID_DATA;
 
-  for(;;) {
-    ble_process();
+  if (flash_erase(page_num, 1)) return ERR_UNKNOWN;
+  if (flash_copy(fw, FLASH_PAGE_ADDR(page_num), (byte_len >> 2))) return ERR_UNKNOWN;
+
+  return ERR_OK;
+}
+
+err_t fw_upgrade() {
+  if (system_valid_firmware(UPGRADE_FW_START)) {
+    system_schedule_reboot();
+  } else {
+    flash_erase(UPGRADE_FW_FIRST_PAGE, FIRMWARE_PAGE_COUNT);
+    return ERR_INVALID_FW;
   }
+  return ERR_OK;
 }

@@ -22,15 +22,35 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+#ifndef BIP32_H_
+#define BIP32_H_
 
-int main() {
-  init_boot();
-  ble_init();
+#include <stdint.h>
 
-  for(;;) {
-    ble_process();
-  }
-}
+#define BIP32_KEY_COMPONENT_LEN 32
+
+typedef struct {
+  uint8_t key[BIP32_KEY_COMPONENT_LEN];
+  uint8_t chain[BIP32_KEY_COMPONENT_LEN];
+} bip32_priv_key_t;
+
+// Padding is needed for alignment reasons. We store keys in compressed format for storage efficiency and because we do not need to verify signatures.
+typedef struct {
+  uint8_t padding[2];
+  uint8_t has_full_y;
+  uint8_t y_comp;
+  uint8_t x[BIP32_KEY_COMPONENT_LEN];
+  uint8_t y[BIP32_KEY_COMPONENT_LEN];
+} bip32_pub_key_t;
+
+/**
+ * Performs the Private CKD algorithm defined in the BIP32 specs. Caching is not performed at this place and must be handled externally.
+ */
+int bip32_ckd_private(uint32_t i, const bip32_priv_key_t* priv_key, const bip32_pub_key_t* pub_key, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub);
+
+/**
+ * Generates the private and public keys from the given binary seed.
+ */
+void bip32_master_key(const uint8_t* seed, int seed_len, bip32_priv_key_t* out_priv, bip32_pub_key_t* out_pub);
+
+#endif /* BIP32_H_ */

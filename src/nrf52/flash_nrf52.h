@@ -22,15 +22,25 @@
  * SOFTWARE.
  */
 
-#include "system.h"
-#include "init.h"
-#include "ble.h"
+/* FLASH_START=0x26000
+FLASH_SIZE=0xda000*/
 
-int main() {
-  init_boot();
-  ble_init();
+#ifndef FLASH_NRF52_H_
+#define FLASH_NRF52_H_
 
-  for(;;) {
-    ble_process();
-  }
-}
+#define FLASH_PAGE_SIZE 0x1000
+
+#define FIRMWARE_PAGE_COUNT 80
+#define FIRMWARE_SIZE (FIRMWARE_PAGE_COUNT * FLASH_PAGE_SIZE)
+
+#define UPGRADE_FW_FIRST_PAGE 118
+#define UPGRADE_FW_START (FLASH_PAGE_SIZE * UPGRADE_FW_FIRST_PAGE)
+
+#define FLASH_USER_AREA_START UPGRADE_FW_START
+#define FLASH_USER_AREA_SIZE (FLASH_PAGE_SIZE * 130)
+
+#define FLASH_PAGE_ADDR(p) ((uint32_t*) (p * FLASH_PAGE_SIZE))
+
+void _nrf52_flash_init();
+
+#endif /* FLASH_NRF52_H_ */
