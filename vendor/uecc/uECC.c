@@ -177,10 +177,6 @@ static cmpresult_t uECC_vli_cmp_unsafe(const uECC_word_t *left,
     #include "asm_arm.inc"
 #endif
 
-#if (uECC_PLATFORM == uECC_avr)
-    #include "asm_avr.inc"
-#endif
-
 #if default_RNG_defined
 static uECC_RNG_Function g_rng_function = &default_RNG;
 #else

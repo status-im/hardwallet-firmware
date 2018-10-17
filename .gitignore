@@ -1,1 +1,3 @@
-/Debug/
+vendor/nrf5
+Output
+*.emSession
